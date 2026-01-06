@@ -1,0 +1,30 @@
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+
+# Env
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+
+# 3D assets (TE GROOT VOOR GIT)
+public/models/*.glb
+public/models/*.gltf
+public/models/*.bin
+public/models/textures/
+
+# Optional: exports
+*.blend
