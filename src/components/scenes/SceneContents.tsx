@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ContactShadows, OrbitControls, useGLTF } from "@react-three/drei";
+import {
+  ContactShadows,
+  OrbitControls,
+  useGLTF,
+} from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -15,6 +19,14 @@ import { ParallaxScene } from "./ParallaxScene";
 import { MachineClickHandler } from "./MachineClickHandler";
 import { useZoneCamera } from "../../hooks/useZoneCamera";
 
+type MachineEntry = {
+  obj: THREE.Object3D;
+  baseY: number;
+  meshes: THREE.Mesh[];
+  active: boolean;
+  activation: number;
+};
+
 export function SceneContents({
   activeZone,
   viewFactor,
@@ -29,79 +41,80 @@ export function SceneContents({
 
   useZoneCamera(activeZone, gltf, controlsRef, viewFactor);
 
-  const machinesRef = useRef<
-    { obj: THREE.Object3D; baseY: number; meshes: THREE.Mesh[] }[]
-  >([]);
+  const machinesRef = useRef<MachineEntry[]>([]);
 
-  const activation = useRef(0);
-  const activationTarget = useRef(0);
-
+  // 🔁 ZONE CHANGE → update active flags
   useEffect(() => {
-    activationTarget.current = 0;
-
     MACHINES.forEach((machine) => {
-      if (machine.zone !== activeZone) return;
-
       const root = gltf.scene.getObjectByName(machine.meshName);
       if (!root) return;
 
-      if (
-        machinesRef.current.some(
-          (m) => m.obj === root
-        )
-      ) {
-        activationTarget.current = 1;
-        return;
+      let entry = machinesRef.current.find(
+        (m) => m.obj === root
+      );
+
+      // 👉 Eerste keer dat we deze machine zien
+      if (!entry) {
+        const meshes: THREE.Mesh[] = [];
+
+        root.traverse((child: any) => {
+          if (!child.isMesh) return;
+
+          child.material = child.material.clone();
+          child.material.emissive = new THREE.Color(
+            SCENE_CONFIG.glowColor
+          );
+          child.material.emissiveIntensity = 0;
+
+          meshes.push(child);
+        });
+
+        entry = {
+          obj: root,
+          baseY: root.position.y,
+          meshes,
+          active: false,
+          activation: 0,
+        };
+
+        machinesRef.current.push(entry);
       }
 
-      const meshes: THREE.Mesh[] = [];
-      root.traverse((child: any) => {
-        if (!child.isMesh) return;
-
-        child.material = child.material.clone();
-        child.material.emissive = new THREE.Color(
-          SCENE_CONFIG.glowColor
-        );
-        child.material.emissiveIntensity = 0;
-
-        meshes.push(child);
-      });
-
-      machinesRef.current.push({
-        obj: root,
-        baseY: root.position.y,
-        meshes,
-      });
-
-      activationTarget.current = 1;
+      // 👉 Active flag correct zetten
+      entry.active = machine.zone === activeZone;
     });
   }, [gltf, activeZone]);
 
+  // 🎞️ PER FRAME: animatie + glow
   useFrame(({ clock }, delta) => {
-    activation.current = THREE.MathUtils.lerp(
-      activation.current,
-      activationTarget.current,
-      delta * SCENE_CONFIG.activationSpeed
-    );
-
     const t = clock.getElapsedTime();
 
-    machinesRef.current.forEach(({ obj, baseY, meshes }, i) => {
-      const a = activation.current;
+    machinesRef.current.forEach((entry, i) => {
+      const target = entry.active ? 1 : 0;
 
-      obj.position.y =
-        baseY +
+      entry.activation = THREE.MathUtils.lerp(
+        entry.activation,
+        target,
+        delta * SCENE_CONFIG.activationSpeed
+      );
+
+      const a = entry.activation;
+
+      entry.obj.position.y =
+        entry.baseY +
         Math.sin(t * SCENE_CONFIG.floatSpeed + i) *
           SCENE_CONFIG.liftHeight *
           a;
 
-      obj.rotation.y =
+      entry.obj.rotation.y =
         Math.sin(t * 0.6 + i) *
         SCENE_CONFIG.rotationAmount *
         a;
 
-      meshes.forEach((mesh) => {
-        (mesh.material as THREE.MeshStandardMaterial).emissiveIntensity =
+      entry.meshes.forEach((mesh) => {
+        (
+          mesh.material as THREE.MeshStandardMaterial
+        ).emissiveIntensity =
           a * SCENE_CONFIG.maxGlowIntensity;
       });
     });
@@ -110,6 +123,7 @@ export function SceneContents({
   return (
     <>
       <ParallaxScene scene={gltf.scene} />
+
       <MachineClickHandler
         activeZone={activeZone}
         onSelect={onMachineSelect}
