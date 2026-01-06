@@ -1,0 +1,33 @@
+
+@font-face {
+  font-family: "HeadingPro";
+  src: url("/src/assets/fonts/Heading-Pro-Treble-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "HeadingPro";
+  src: url("/src/assets/fonts/Heading-Pro-Treble-DoubleRegular.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "HeadingPro";
+  src: url("/src/assets/fonts/Heading-Pro-Treble-ExtraBold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "HeadingPro";
+  src: url("/src/assets/fonts/Heading-Pro-Treble-Heavy.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+/* Globale font */
+body {
+  font-family: "HeadingPro", -apple-system, BlinkMacSystemFont, sans-serif;
+}
