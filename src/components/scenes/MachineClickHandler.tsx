@@ -19,7 +19,7 @@ export function MachineClickHandler({
   function getMachine(obj: THREE.Object3D | null) {
     while (obj) {
       const machine = MACHINES.find(
-        (m) => m.meshName === obj.name
+        (m) => m.meshName === obj?.name
       );
       if (machine) return machine;
       obj = obj.parent as THREE.Object3D | null;

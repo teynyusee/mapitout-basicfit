@@ -24,7 +24,7 @@ export function GymCanvas({ children }: { children: React.ReactNode }) {
       <color attach="background" args={["#0a0a0a"]} />
 
       {/* 🌍 Environment (low intensity, just reflections) */}
-      <Environment preset="warehouse" intensity={0.45} />
+      <Environment preset="warehouse" />
 
       {/* 🌫️ VERY subtle ambient */}
       <ambientLight intensity={0.25} />
