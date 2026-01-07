@@ -1,19 +1,18 @@
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
 type Props = {
   scene: THREE.Object3D;
+  onPointerMove?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: () => void;
 };
 
-const ROTATION = {
-  x: 0.02,
-  y: 0.1,
-};
-
-const LERP_SPEED = 0.1;
-
-export function ParallaxScene({ scene }: Props) {
+export function ParallaxScene({
+  scene,
+  onPointerMove,
+  onPointerOut,
+}: Props) {
   const groupRef = useRef<THREE.Group>(null);
   const { pointer } = useThree();
 
@@ -21,24 +20,24 @@ export function ParallaxScene({ scene }: Props) {
     const group = groupRef.current;
     if (!group) return;
 
-    const targetX = pointer.y * ROTATION.x;
-    const targetY = pointer.x * ROTATION.y;
-
     group.rotation.x = THREE.MathUtils.lerp(
       group.rotation.x,
-      targetX,
-      LERP_SPEED * delta * 60
+      pointer.y * 0.02,
+      delta * 6
     );
-
     group.rotation.y = THREE.MathUtils.lerp(
       group.rotation.y,
-      targetY,
-      LERP_SPEED * delta * 60
+      pointer.x * 0.1,
+      delta * 6
     );
   });
 
   return (
-    <group ref={groupRef}>
+    <group
+      ref={groupRef}
+      onPointerMove={onPointerMove}
+      onPointerOut={onPointerOut}
+    >
       <primitive object={scene} />
     </group>
   );

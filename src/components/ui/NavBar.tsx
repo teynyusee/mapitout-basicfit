@@ -3,7 +3,7 @@ import { ZONES, type ZoneId } from "../../data/zones";
 import { theme } from "../../styles/theme";
 
 type NavBarProps = {
-  activeZone: ZoneId;
+  activeZone?: ZoneId;
   onZoneChange: (zone: ZoneId) => void;
 };
 
@@ -11,19 +11,14 @@ export function NavBar({ activeZone, onZoneChange }: NavBarProps) {
   return (
     <nav
       style={{
-        position: "absolute",
-        top: 24,
-        left: "50%",
-        transform: "translateX(-50%)",
         display: "flex",
-        gap: theme.spacing.xs,
-        padding: theme.spacing.xs,
+        gap: theme.spacing.sm,
+        padding: `${theme.spacing.sm} ${theme.spacing.md}`,
         background: theme.colors.surfaceGlass,
         borderRadius: theme.radius.pill,
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
         boxShadow: theme.shadow.soft,
-        zIndex: 20,
       }}
     >
       {ZONES.map((zone) => (
@@ -56,14 +51,11 @@ function NavButton({
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-    const rx = Math.max(-0.5, Math.min(0.5, y)) * -12;
-    const ry = Math.max(-0.5, Math.min(0.5, x)) * 12;
-
     ref.current.style.transform = `
-      perspective(700px)
-      rotateX(${rx}deg)
-      rotateY(${ry}deg)
-      translateZ(${active ? 14 : 10}px)
+      perspective(800px)
+      rotateX(${y * -8}deg)
+      rotateY(${x * 8}deg)
+      translateZ(${active ? 12 : 6}px)
     `;
   }
 
@@ -71,10 +63,10 @@ function NavButton({
     if (!ref.current) return;
 
     ref.current.style.transform = `
-      perspective(700px)
+      perspective(800px)
       rotateX(0deg)
       rotateY(0deg)
-      translateZ(${active ? 14 : 0}px)
+      translateZ(${active ? 12 : 0}px)
     `;
   }
 
@@ -86,8 +78,7 @@ function NavButton({
       onPointerLeave={reset}
       onFocus={(e) => e.currentTarget.blur()}
       style={{
-        position: "relative",
-        padding: `${theme.spacing.xs} ${theme.spacing.md}`,
+        padding: "10px 22px", // 👈 consistenter
         borderRadius: theme.radius.pill,
         border: "none",
         background: active
@@ -95,16 +86,15 @@ function NavButton({
           : "transparent",
         color: active ? "#111" : theme.colors.textMuted,
         fontFamily: theme.font.family,
-        fontSize: "0.85rem",
+        fontSize: "0.9rem",
         fontWeight: theme.font.weight.medium,
-        letterSpacing: "0.03em",
+        letterSpacing: "0.04em",
         cursor: "pointer",
         boxShadow: active
-          ? "0 12px 26px rgba(255,138,0,0.45)"
-          : "0 4px 14px rgba(0,0,0,0.3)",
+          ? "0 8px 18px rgba(255,138,0,0.4)"
+          : "0 3px 10px rgba(0,0,0,0.25)",
         transition:
           "transform 0.12s ease-out, box-shadow 0.15s ease, background 0.25s ease, color 0.25s ease",
-        willChange: "transform",
       }}
     >
       {label}

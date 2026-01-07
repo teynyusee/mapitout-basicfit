@@ -1,19 +1,18 @@
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 import * as THREE from "three";
-import { useRef } from "react";
 
 export function IntroCamera() {
-  const { camera } = useThree();
+  const state = useThree();
 
-  const targetPos = useRef(new THREE.Vector3(0, 1.6, 6));
-  const targetLook = useRef(new THREE.Vector3(0, 1.4, 0));
-  const look = useRef(new THREE.Vector3());
+  useEffect(() => {
+    // 👇 expliciet casten (fix voor ESLint + TS)
+    const camera = state.camera as THREE.OrthographicCamera;
+    camera.position.set(0, 0, 10);
+    camera.lookAt(0, 0, 0);
 
-  useFrame(() => {
-    camera.position.lerp(targetPos.current, 0.08);
-    look.current.lerp(targetLook.current, 0.08);
-    camera.lookAt(look.current);
-  });
+    camera.updateProjectionMatrix();
+  }, [state]);
 
   return null;
 }
