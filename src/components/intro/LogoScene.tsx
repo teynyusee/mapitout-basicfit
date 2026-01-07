@@ -5,8 +5,10 @@ import * as THREE from "three";
 
 export function LogoScene({
   onClick,
+  fading,
 }: {
   onClick: () => void;
+  fading: boolean;
 }) {
   const { scene } = useGLTF("/models/basic-fit_logo3D.glb");
   const group = useRef<THREE.Group>(null);
@@ -15,22 +17,28 @@ export function LogoScene({
   useFrame(() => {
     if (!group.current) return;
 
-    // 🎯 subtiele target rotatie op basis van muis
-    const targetRotY = pointer.x * 0.35;
-    const targetRotX = pointer.y * 0.15;
-
-    // 🧈 smooth lerp
-    group.current.rotation.y = THREE.MathUtils.lerp(
-      group.current.rotation.y,
-      targetRotY,
-      0.08
-    );
-
-    group.current.rotation.x = THREE.MathUtils.lerp(
-      group.current.rotation.x,
-      targetRotX,
-      0.08
-    );
+    if (!fading) {
+      group.current.rotation.y = THREE.MathUtils.lerp(
+        group.current.rotation.y,
+        pointer.x * 0.35,
+        0.08
+      );
+      group.current.rotation.x = THREE.MathUtils.lerp(
+        group.current.rotation.x,
+        pointer.y * 0.15,
+        0.08
+      );
+    } else {
+      group.current.scale.lerp(
+        new THREE.Vector3(0.75, 0.75, 0.75),
+        0.05
+      );
+      group.current.position.y = THREE.MathUtils.lerp(
+        group.current.position.y,
+        -6,
+        0.05
+      );
+    }
   });
 
   return (

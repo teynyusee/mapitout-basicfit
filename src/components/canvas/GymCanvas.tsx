@@ -53,11 +53,11 @@ export function GymCanvas({
       />
 
       <directionalLight
-      position={[0, -20, 0]}
-      intensity={0.25}
-      color="#ffffff"
-      castShadow={false}
-      />
+    position={[0, -20, 0]}
+    intensity={0.25}
+    color="#ffffff"
+    castShadow={false}
+  />
 
       {/* 🔦 FILL LIGHT (GEEN shadows) */}
       <directionalLight
@@ -78,7 +78,7 @@ export function GymCanvas({
       {/* 🔥 RIM LIGHT */}
       <directionalLight
         position={[0, 25, -50]}
-        intensity={1.0}
+        intensity={0.8}
         color="#ffb380"
         castShadow={false}
       />

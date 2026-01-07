@@ -25,6 +25,7 @@ type MachineEntry = {
   meshes: THREE.Mesh[];
   active: boolean;
   activation: number;
+  focused: boolean;
 };
 
 export function SceneContents({
@@ -34,7 +35,10 @@ export function SceneContents({
 }: {
   activeZone: ZoneId;
   viewFactor: number;
-  onMachineSelect: (machine: MachineConfig) => void;
+  onMachineSelect: (
+    machine: MachineConfig,
+    rootObject: THREE.Object3D
+  ) => void;
 }) {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const gltf = useGLTF("/models/gym_overview.glb") as any;
@@ -43,7 +47,7 @@ export function SceneContents({
 
   const machinesRef = useRef<MachineEntry[]>([]);
 
-  // 🔁 ZONE CHANGE → update active flags
+  // 🔁 ZONE CHANGE → setup machines
   useEffect(() => {
     MACHINES.forEach((machine) => {
       const root = gltf.scene.getObjectByName(machine.meshName);
@@ -53,7 +57,7 @@ export function SceneContents({
         (m) => m.obj === root
       );
 
-      // 👉 Eerste keer dat we deze machine zien
+      // 👉 Eerste keer: init machine
       if (!entry) {
         const meshes: THREE.Mesh[] = [];
 
@@ -75,17 +79,27 @@ export function SceneContents({
           meshes,
           active: false,
           activation: 0,
+          focused: false,
         };
 
         machinesRef.current.push(entry);
       }
 
-      // 👉 Active flag correct zetten
       entry.active = machine.zone === activeZone;
+      entry.focused = false;
     });
   }, [gltf, activeZone]);
 
-  // 🎞️ PER FRAME: animatie + glow
+  // 🎯 MACHINE SELECT (focus correct zetten)
+  function handleSelect(machine: MachineConfig, root: THREE.Object3D) {
+    machinesRef.current.forEach((m) => {
+      m.focused = m.obj === root;
+    });
+
+    onMachineSelect(machine, root);
+  }
+
+  // 🎞️ PER FRAME: animatie + glow + focus
   useFrame(({ clock }, delta) => {
     const t = clock.getElapsedTime();
 
@@ -99,12 +113,14 @@ export function SceneContents({
       );
 
       const a = entry.activation;
+      const focusBoost = entry.focused ? 1.6 : 1;
 
       entry.obj.position.y =
         entry.baseY +
         Math.sin(t * SCENE_CONFIG.floatSpeed + i) *
           SCENE_CONFIG.liftHeight *
-          a;
+          a *
+          focusBoost;
 
       entry.obj.rotation.y =
         Math.sin(t * 0.6 + i) *
@@ -115,7 +131,9 @@ export function SceneContents({
         (
           mesh.material as THREE.MeshStandardMaterial
         ).emissiveIntensity =
-          a * SCENE_CONFIG.maxGlowIntensity;
+          a *
+          SCENE_CONFIG.maxGlowIntensity *
+          (entry.focused ? 1.4 : 1);
       });
     });
   });
@@ -126,7 +144,7 @@ export function SceneContents({
 
       <MachineClickHandler
         activeZone={activeZone}
-        onSelect={onMachineSelect}
+        onSelect={handleSelect}
       />
 
       <ContactShadows

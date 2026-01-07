@@ -1,9 +1,12 @@
 import { useState, useRef } from "react";
+import * as THREE from "three";
+
 import { GymCanvas } from "./components/canvas/GymCanvas";
 import { SceneContents } from "./components/scenes/SceneContents";
 import { NavBar } from "./components/ui/NavBar";
 import { LogoScene } from "./components/intro/LogoScene";
 import { IntroCamera } from "./hooks/useIntroCamera";
+import { MachineInfoModal } from "./components/ui/MachineInfoCard";
 
 import type { ZoneId } from "./data/zones";
 import type { MachineConfig } from "./data/machines";
@@ -11,15 +14,17 @@ import { CAMERA_NAMES } from "./data/cameras";
 
 type ViewMode = "intro" | "map";
 
-export default function App() {
-  const [viewMode, setViewMode] =
-    useState<ViewMode>("intro");
+type SelectedMachine = {
+  machine: MachineConfig;
+  root: THREE.Object3D;
+};
 
-  const [activeZone, setActiveZone] =
-    useState<ZoneId>("overview");
+export default function App() {
+  const [viewMode, setViewMode] = useState<ViewMode>("intro");
+  const [activeZone, setActiveZone] = useState<ZoneId>("overview");
 
   const [selectedMachine, setSelectedMachine] =
-    useState<MachineConfig | null>(null);
+    useState<SelectedMachine | null>(null);
 
   const [zoneViewFactors, setZoneViewFactors] =
     useState<Record<ZoneId, number>>({
@@ -31,7 +36,6 @@ export default function App() {
     });
 
   const sliderRAF = useRef<number | null>(null);
-
 
   function handleStart() {
     setViewMode("map");
@@ -49,7 +53,7 @@ export default function App() {
         {viewMode === "intro" && (
           <>
             <IntroCamera />
-            <LogoScene onClick={handleStart} />
+            <LogoScene onClick={handleStart} fading={false} />
           </>
         )}
 
@@ -57,12 +61,13 @@ export default function App() {
           <SceneContents
             activeZone={activeZone}
             viewFactor={zoneViewFactors[activeZone]}
-            onMachineSelect={setSelectedMachine}
+            onMachineSelect={(machine, root) =>
+              setSelectedMachine({ machine, root })
+            }
           />
         )}
       </GymCanvas>
 
-      {/* UI alleen in MAP */}
       {viewMode === "map" && (
         <>
           <NavBar
@@ -79,11 +84,9 @@ export default function App() {
               value={zoneViewFactors[activeZone]}
               onChange={(e) => {
                 const value = Number(e.target.value);
-
                 if (sliderRAF.current) {
                   cancelAnimationFrame(sliderRAF.current);
                 }
-
                 sliderRAF.current = requestAnimationFrame(() => {
                   setZoneViewFactors((p) => ({
                     ...p,
@@ -101,38 +104,12 @@ export default function App() {
             />
           )}
 
-          {/* ✅ MACHINE INFO PANEL (DIT ONTBRAK) */}
           {selectedMachine && (
-            <div
-              style={{
-                position: "absolute",
-                right: 20,
-                top: 80,
-                width: 300,
-                background: "rgba(0,0,0,0.85)",
-                color: "#fff",
-                padding: "1rem",
-                borderRadius: 14,
-                zIndex: 30,
-              }}
-            >
-              <h3>{selectedMachine.info.title}</h3>
-              <p>{selectedMachine.info.description}</p>
-
-              <button
-                onClick={() => setSelectedMachine(null)}
-                style={{
-                  marginTop: "0.75rem",
-                  width: "100%",
-                  padding: "0.4rem",
-                  borderRadius: 8,
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                Sluiten
-              </button>
-            </div>
+            <MachineInfoModal
+              machine={selectedMachine.machine}
+              root={selectedMachine.root}
+              onClose={() => setSelectedMachine(null)}
+            />
           )}
         </>
       )}

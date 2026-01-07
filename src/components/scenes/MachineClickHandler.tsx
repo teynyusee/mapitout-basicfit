@@ -7,7 +7,7 @@ import type { ZoneId } from "../../data/zones";
 
 type Props = {
   activeZone: ZoneId;
-  onSelect: (machine: MachineConfig) => void;
+  onSelect: (machine: MachineConfig, root: THREE.Object3D) => void; 
 };
 
 export function MachineClickHandler({
@@ -50,7 +50,7 @@ export function MachineClickHandler({
     for (const hit of hits) {
       const machine = getMachine(hit.object);
       if (machine && machine.zone === activeZone) {
-        onSelect(machine);
+        onSelect(machine, hit.object);
         break;
       }
     }
