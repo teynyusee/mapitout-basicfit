@@ -2,19 +2,19 @@ import type { ZoneId } from "./zones";
 
 export type MachineConfig = {
   id: string;
-
-  // 👇 exact de naam van het ROOT object in Blender
   meshName: string;
-
-  // 👇 zone waarin deze machine actief is
   zone: ZoneId;
-
-  // 👇 UI info
   info: {
     title: string;
     description: string;
   };
+
+  previewCamera?: {
+    position: [number, number, number];
+    fov?: number;
+  };
 };
+
 
 export const MACHINES: MachineConfig[] = [
   {
@@ -25,6 +25,10 @@ export const MACHINES: MachineConfig[] = [
       title: "Treadmill",
       description: "Ideaal voor cardio en conditie.",
     },
+    previewCamera: {
+    position: [0, 1.1, 2.4],
+    fov: 38
+  }
   },
   {
     id: "stepper",

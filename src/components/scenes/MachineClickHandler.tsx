@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef  } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 import { MACHINES, type MachineConfig } from "../../data/machines";
@@ -7,7 +7,7 @@ import type { ZoneId } from "../../data/zones";
 
 type Props = {
   activeZone: ZoneId;
-  onSelect: (machine: MachineConfig, root: THREE.Object3D) => void; 
+  onSelect: (machine: MachineConfig, root: THREE.Object3D) => void;
 };
 
 export function MachineClickHandler({
@@ -17,40 +17,51 @@ export function MachineClickHandler({
   const { camera, scene, raycaster, pointer } = useThree();
   const rafRef = useRef<number | null>(null);
 
-  function getMachine(obj: THREE.Object3D | null) {
-    while (obj) {
+  /**
+   * 🔍 Zoek MachineConfig + ROOT OBJECT
+   * → NIET de submesh / material / face
+   */
+  function getMachineAndRoot(obj: THREE.Object3D | null): {
+    machine: MachineConfig;
+    root: THREE.Object3D;
+  } | null {
+    let current: THREE.Object3D | null = obj;
+
+    while (current) {
       const machine = MACHINES.find(
-        (m) => m.meshName === obj?.name
+        (m) => m.meshName === current.name
       );
-      if (machine) return machine;
-      obj = obj.parent as THREE.Object3D | null;
+
+      if (machine) {
+        return { machine, root: current };
+      }
+
+      current = current.parent;
     }
+
     return null;
   }
 
   function runRaycast(click = false) {
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects(
-      scene.children,
-      true
-    );
+    const hits = raycaster.intersectObjects(scene.children, true);
 
     if (!click) {
       const hovering = hits.some((h) => {
-        const m = getMachine(h.object);
-        return m?.zone === activeZone;
+        const result = getMachineAndRoot(h.object);
+        return result?.machine.zone === activeZone;
       });
 
-      document.body.style.cursor = hovering
-        ? "pointer"
-        : "default";
+      document.body.style.cursor = hovering ? "pointer" : "default";
       return;
     }
 
     for (const hit of hits) {
-      const machine = getMachine(hit.object);
-      if (machine && machine.zone === activeZone) {
-        onSelect(machine, hit.object);
+      const result = getMachineAndRoot(hit.object);
+
+      if (result && result.machine.zone === activeZone) {
+        // ✅ ALTIJD ROOT OBJECT DOORGEVEN
+        onSelect(result.machine, result.root);
         break;
       }
     }
