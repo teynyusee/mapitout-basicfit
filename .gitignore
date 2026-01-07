@@ -20,11 +20,12 @@ yarn-error.log*
 # Editor
 .vscode/
 
-# 3D assets (TE GROOT VOOR GIT)
+# 3D assets
 public/models/*.glb
 public/models/*.gltf
 public/models/*.bin
 public/models/textures/
+!/public/models/basic-fit_logo3D.glb
 
 # Optional: exports
 *.blend
