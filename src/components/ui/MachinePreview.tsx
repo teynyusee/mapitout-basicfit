@@ -2,6 +2,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { MeshStandardMaterial } from "three";
+
 
 type CameraConfig = {
   position: [number, number, number];
@@ -13,15 +15,11 @@ type Props = {
   camera?: CameraConfig;
 };
 
-/* =============================== */
-/* SCENE MET AUTO + MOUSE ROTATIE */
-/* =============================== */
 function PreviewScene({ object }: { object: THREE.Object3D }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    // 🍯 SLOW AUTO ROTATE
     groupRef.current.rotation.y += delta * 0.25;
   });
 
@@ -36,42 +34,53 @@ export function MachinePreview({ root, camera }: Props) {
   const previewObject = useMemo(() => {
     const clone = root.clone(true) as THREE.Group;
 
-    clone.traverse((o: any) => {
-  if (o.isMesh && o.material) {
-    const mat = o.material.clone();
+    clone.traverse((o: THREE.Object3D) => {
+  if ((o as THREE.Mesh).isMesh) {
+    const mesh = o as THREE.Mesh;
+    const material = mesh.material;
 
-    // ✅ behoud originele GLTF kleuren
-    mat.side = THREE.DoubleSide;
-    mat.emissive?.set(0x000000);
-    mat.emissiveIntensity = 0;
+    if (Array.isArray(material)) {
+      mesh.material = material.map((m) => {
+        const mat = m.clone();
 
-    // ❗ NIET aankomen aan color / roughness / metalness
-    // GLTF weet dit al correct
+        if (mat instanceof MeshStandardMaterial) {
+          mat.side = THREE.DoubleSide;
+          mat.emissive.set(0x000000);
+          mat.emissiveIntensity = 0;
+        }
 
-    o.material = mat;
+        return mat;
+      });
+    } else {
+      const mat = material.clone();
+
+      if (mat instanceof MeshStandardMaterial) {
+        mat.side = THREE.DoubleSide;
+        mat.emissive.set(0x000000);
+        mat.emissiveIntensity = 0;
+      }
+
+      mesh.material = mat;
+    }
   }
 });
 
 
-    // 🔒 RESET TRANSFORMS
     clone.position.set(0, 0, 0);
     clone.rotation.set(0, 0, 0);
     clone.scale.set(1, 1, 1);
 
-    // 📦 CENTER OBJECT
     const box = new THREE.Box3().setFromObject(clone);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
 
     clone.position.sub(center);
 
-    // 🎯 UNIFORME GROOTTE
     const TARGET_SIZE = 2.2;
     const maxAxis = Math.max(size.x, size.y, size.z);
     const scale = TARGET_SIZE / maxAxis;
     clone.scale.setScalar(scale);
 
-    // ✅ FRONT VIEW (correct)
     clone.rotation.x = -Math.PI / 2;
     clone.rotation.y = Math.PI;
 
@@ -88,13 +97,12 @@ export function MachinePreview({ root, camera }: Props) {
       }}
       gl={{
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.2, // 🔥 DIT FIXT JE ORANJE KLEUREN
+        toneMappingExposure: 1.2,
         outputColorSpace: THREE.SRGBColorSpace,
       }}
     >
       <color attach="background" args={["#151515"]} />
 
-      {/* 💡 CORRECTE BELICHTING */}
       <ambientLight intensity={0.8} />
 
       <directionalLight
@@ -107,12 +115,10 @@ export function MachinePreview({ root, camera }: Props) {
         intensity={2}
       />
 
-      {/* 🌍 DIT IS WAAR JE KLEUREN VANDAAN KOMEN */}
       <Environment preset="warehouse" />
 
       <PreviewScene object={previewObject} />
 
-      {/* 🖱️ MOUSE ROTATIE */}
       <OrbitControls
         enableZoom={false}
         enablePan={false}

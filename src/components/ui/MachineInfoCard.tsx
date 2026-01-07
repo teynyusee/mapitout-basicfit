@@ -9,58 +9,56 @@ type Props = {
   onClose: () => void;
 };
 
-export function MachineInfoModal({
-  machine,
-  root,
-  onClose,
-}: Props) {
+export function MachineInfoModal({ machine, root, onClose }: Props) {
   return (
     <>
+      {/* Overlay */}
       <div
         onClick={onClose}
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(0,0,0,0.65)",
+          backdropFilter: "blur(10px)",
           zIndex: 40,
         }}
       />
 
+      {/* Modal */}
       <div
         style={{
           position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "80vw",
-          maxWidth: 960,
-          height: 420,
-          borderRadius: theme.radius.md,
+          width: "82vw",
+          maxWidth: 1000,
+          height: 460,
           background: theme.colors.surface,
+          borderRadius: theme.radius.md,
           boxShadow: theme.shadow.strong,
           color: theme.colors.textMain,
-          zIndex: 50,
           display: "flex",
           overflow: "hidden",
+          zIndex: 50,
         }}
       >
-        <div style={{ flex: 1.3 }}>
-          <MachinePreview
-            root={root}
-            camera={machine.previewCamera}
-          />
+        {/* Preview */}
+        <div style={{ flex: 1.4 }}>
+          <MachinePreview root={root} camera={machine.previewCamera} />
         </div>
 
+        {/* Info */}
         <div
           style={{
             flex: 1,
             padding: theme.spacing.lg,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
+            gap: theme.spacing.md,
           }}
         >
+          {/* Header */}
           <div>
             <h2
               style={{
@@ -72,35 +70,128 @@ export function MachineInfoModal({
               {machine.info.title}
             </h2>
 
-            <p
+            <div
               style={{
-                marginTop: theme.spacing.sm,
-                color: theme.colors.textMuted,
-                lineHeight: 1.5,
+                display: "flex",
+                gap: 8,
+                marginTop: 8,
+                flexWrap: "wrap",
               }}
             >
-              {machine.info.description}
-            </p>
+              <Tag label={machine.info.category} variant="category" />
+              {machine.info.tags.map((tag) => (
+                <Tag key={tag} label={tag} />
+              ))}
+            </div>
           </div>
 
-          <button
-            onClick={onClose}
+          {/* Description */}
+          <p
             style={{
-              alignSelf: "flex-start",
-              padding: "0.75rem 2rem",
-              borderRadius: theme.radius.pill,
-              border: "none",
-              cursor: "pointer",
-              background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primarySoft})`,
-              color: "#111",
-              fontWeight: theme.font.weight.bold,
-              fontFamily: theme.font.family,
+              color: theme.colors.textMuted,
+              lineHeight: 1.6,
+              margin: 0,
             }}
           >
-            Sluiten
-          </button>
+            {machine.info.description}
+          </p>
+
+          {/* Specs */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Spec label="Difficulty" value={machine.info.difficulty} />
+          </div>
+
+          {/* Actions */}
+          <div
+            style={{
+              marginTop: "auto",
+              display: "flex",
+              gap: 12,
+            }}
+          >
+            <button style={secondaryButton}>Details</button>
+            <button onClick={onClose} style={primaryButton}>
+              Sluiten
+            </button>
+          </div>
         </div>
       </div>
     </>
   );
 }
+
+/* -------------------- */
+/* UI COMPONENTS */
+/* -------------------- */
+
+function Tag({
+  label,
+  variant = "default",
+}: {
+  label: string;
+  variant?: "default" | "category";
+}) {
+  return (
+    <span
+      style={{
+        padding: "4px 10px",
+        borderRadius: theme.radius.pill,
+        fontSize: 12,
+        fontWeight: theme.font.weight.medium,
+        background:
+          variant === "category"
+            ? "rgba(100,180,255,0.18)"
+            : "rgba(255,255,255,0.08)",
+        color:
+          variant === "category"
+            ? theme.colors.primary
+            : theme.colors.textMuted,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function Spec({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        background: theme.colors.primarySoft,
+        padding: "12px",
+        borderRadius: theme.radius.sm,
+      }}
+    >
+      <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
+        {label}
+      </div>
+      <div style={{ fontWeight: theme.font.weight.bold }}>{value}</div>
+    </div>
+  );
+}
+
+
+const primaryButton: React.CSSProperties = {
+  padding: "0.7rem 1.8rem",
+  borderRadius: theme.radius.pill,
+  border: "none",
+  cursor: "pointer",
+  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primarySoft})`,
+  color: "#111",
+  fontWeight: theme.font.weight.bold,
+};
+
+const secondaryButton: React.CSSProperties = {
+  padding: "0.7rem 1.8rem",
+  borderRadius: theme.radius.pill,
+  border: "1px solid rgba(255,255,255,0.15)",
+  background: "transparent",
+  color: theme.colors.textMain,
+  cursor: "pointer",
+};
