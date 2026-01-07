@@ -1,0 +1,11 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0a0a0a;
+  color: #fff;
+  font-family: "HeadingPro", system-ui, sans-serif;
+}

@@ -1,6 +1,7 @@
-import type { MachineConfig } from "../../data/machines";
 import * as THREE from "three";
+import type { MachineConfig } from "../../data/machines";
 import { MachinePreview } from "./MachinePreview";
+import { theme } from "../../styles/theme";
 
 type Props = {
   machine: MachineConfig;
@@ -8,7 +9,11 @@ type Props = {
   onClose: () => void;
 };
 
-export function MachineInfoModal({ machine, root, onClose }: Props) {
+export function MachineInfoModal({
+  machine,
+  root,
+  onClose,
+}: Props) {
   return (
     <>
       <div
@@ -31,31 +36,49 @@ export function MachineInfoModal({ machine, root, onClose }: Props) {
           width: "80vw",
           maxWidth: 960,
           height: 420,
-          borderRadius: 28,
-          background: "rgba(18,18,18,0.95)",
-          boxShadow: "0 40px 80px rgba(0,0,0,0.65)",
-          color: "#fff",
+          borderRadius: theme.radius.md,
+          background: theme.colors.surface,
+          boxShadow: theme.shadow.strong,
+          color: theme.colors.textMain,
           zIndex: 50,
           display: "flex",
           overflow: "hidden",
         }}
       >
         <div style={{ flex: 1.3 }}>
-          <MachinePreview root={root} camera={machine.previewCamera} />
+          <MachinePreview
+            root={root}
+            camera={machine.previewCamera}
+          />
         </div>
 
         <div
           style={{
             flex: 1,
-            padding: "2rem",
+            padding: theme.spacing.lg,
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
           }}
         >
           <div>
-            <h2>{machine.info.title}</h2>
-            <p style={{ color: "#ccc" }}>
+            <h2
+              style={{
+                margin: 0,
+                fontFamily: theme.font.family,
+                fontWeight: theme.font.weight.bold,
+              }}
+            >
+              {machine.info.title}
+            </h2>
+
+            <p
+              style={{
+                marginTop: theme.spacing.sm,
+                color: theme.colors.textMuted,
+                lineHeight: 1.5,
+              }}
+            >
               {machine.info.description}
             </p>
           </div>
@@ -63,14 +86,15 @@ export function MachineInfoModal({ machine, root, onClose }: Props) {
           <button
             onClick={onClose}
             style={{
+              alignSelf: "flex-start",
               padding: "0.75rem 2rem",
-              borderRadius: 999,
+              borderRadius: theme.radius.pill,
               border: "none",
               cursor: "pointer",
-              background:
-                "linear-gradient(135deg, #ff8a00, #ffb347)",
+              background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primarySoft})`,
               color: "#111",
-              fontWeight: 700,
+              fontWeight: theme.font.weight.bold,
+              fontFamily: theme.font.family,
             }}
           >
             Sluiten

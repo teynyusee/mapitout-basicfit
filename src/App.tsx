@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import * as THREE from "three";
 
 import { GymCanvas } from "./components/canvas/GymCanvas";
@@ -19,9 +19,18 @@ type SelectedMachine = {
   root: THREE.Object3D;
 };
 
+const APP_CONTAINER_STYLE: React.CSSProperties = {
+  width: "100vw",
+  height: "100vh",
+  position: "relative",
+};
+
 export default function App() {
-  const [viewMode, setViewMode] = useState<ViewMode>("intro");
-  const [activeZone, setActiveZone] = useState<ZoneId>("overview");
+  const [viewMode, setViewMode] =
+    useState<ViewMode>("intro");
+
+  const [activeZone, setActiveZone] =
+    useState<ZoneId>("overview");
 
   const [selectedMachine, setSelectedMachine] =
     useState<SelectedMachine | null>(null);
@@ -37,23 +46,55 @@ export default function App() {
 
   const sliderRAF = useRef<number | null>(null);
 
-  function handleStart() {
+  const handleStart = useCallback(() => {
     setViewMode("map");
-  }
+  }, []);
 
-  function handleZoneChange(zone: ZoneId) {
-    setActiveZone(zone);
-    setSelectedMachine(null);
-    setZoneViewFactors((p) => ({ ...p, [zone]: 0 }));
-  }
+  const handleZoneChange = useCallback(
+    (zone: ZoneId) => {
+      setActiveZone(zone);
+      setSelectedMachine(null);
+      setZoneViewFactors((p) => ({
+        ...p,
+        [zone]: 0,
+      }));
+    },
+    []
+  );
+
+  const handleMachineSelect = useCallback(
+    (machine: MachineConfig, root: THREE.Object3D) => {
+      setSelectedMachine({ machine, root });
+    },
+    []
+  );
+
+  const handleSliderChange = useCallback(
+    (value: number) => {
+      if (sliderRAF.current) {
+        cancelAnimationFrame(sliderRAF.current);
+      }
+
+      sliderRAF.current = requestAnimationFrame(() => {
+        setZoneViewFactors((p) => ({
+          ...p,
+          [activeZone]: value,
+        }));
+      });
+    },
+    [activeZone]
+  );
 
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+    <div style={APP_CONTAINER_STYLE}>
       <GymCanvas>
         {viewMode === "intro" && (
           <>
             <IntroCamera />
-            <LogoScene onClick={handleStart} fading={false} />
+            <LogoScene
+              onClick={handleStart}
+              fading={false}
+            />
           </>
         )}
 
@@ -61,9 +102,7 @@ export default function App() {
           <SceneContents
             activeZone={activeZone}
             viewFactor={zoneViewFactors[activeZone]}
-            onMachineSelect={(machine, root) =>
-              setSelectedMachine({ machine, root })
-            }
+            onMachineSelect={handleMachineSelect}
           />
         )}
       </GymCanvas>
@@ -82,18 +121,11 @@ export default function App() {
               max={1}
               step={0.01}
               value={zoneViewFactors[activeZone]}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (sliderRAF.current) {
-                  cancelAnimationFrame(sliderRAF.current);
-                }
-                sliderRAF.current = requestAnimationFrame(() => {
-                  setZoneViewFactors((p) => ({
-                    ...p,
-                    [activeZone]: value,
-                  }));
-                });
-              }}
+              onChange={(e) =>
+                handleSliderChange(
+                  Number(e.target.value)
+                )
+              }
               style={{
                 position: "absolute",
                 bottom: 20,
@@ -108,7 +140,9 @@ export default function App() {
             <MachineInfoModal
               machine={selectedMachine.machine}
               root={selectedMachine.root}
-              onClose={() => setSelectedMachine(null)}
+              onClose={() =>
+                setSelectedMachine(null)
+              }
             />
           )}
         </>

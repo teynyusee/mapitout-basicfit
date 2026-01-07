@@ -1,26 +1,39 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
 import { useRef } from "react";
+import * as THREE from "three";
 
-export function ParallaxScene({ scene }: { scene: THREE.Object3D }) {
-  const groupRef = useRef<THREE.Group | null>(null);
+type Props = {
+  scene: THREE.Object3D;
+};
+
+const ROTATION = {
+  x: 0.02,
+  y: 0.1,
+};
+
+const LERP_SPEED = 0.1;
+
+export function ParallaxScene({ scene }: Props) {
+  const groupRef = useRef<THREE.Group>(null);
   const { pointer } = useThree();
 
-  useFrame(() => {
-    if (!groupRef.current) return;
+  useFrame((_, delta) => {
+    const group = groupRef.current;
+    if (!group) return;
 
-    const targetRotX = pointer.y * 0.05;
-    const targetRotY = pointer.x * 0.1;
+    const targetX = pointer.y * ROTATION.x;
+    const targetY = pointer.x * ROTATION.y;
 
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
-      targetRotX,
-      0.1
+    group.rotation.x = THREE.MathUtils.lerp(
+      group.rotation.x,
+      targetX,
+      LERP_SPEED * delta * 60
     );
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
-      targetRotY,
-      0.1
+
+    group.rotation.y = THREE.MathUtils.lerp(
+      group.rotation.y,
+      targetY,
+      LERP_SPEED * delta * 60
     );
   });
 
