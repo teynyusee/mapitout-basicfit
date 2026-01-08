@@ -7,20 +7,19 @@ import type { ZoneId } from "../data/zones";
 export type MachineEntry = {
   machine: MachineConfig;
   obj: THREE.Object3D;
-  baseY: number;
   meshes: THREE.Mesh[];
+  baseY: number;
 
   active: boolean;
-  activation: number;
-
   focused: boolean;
+
+  activation: number;
   focusIntensity: number;
 
+  focusTimer: number;
   blueFade: number;
-  focusTimer: number; 
-  lastFocused: boolean;
-
 };
+
 
 
 export function useMachinesSetup(
@@ -67,8 +66,8 @@ export function useMachinesSetup(
           focusIntensity: 0,
 
           blueFade: 0,
-          focusTimer: 0, 
-          lastFocused: false,
+          focusTimer: 0,
+
         };
 
         machinesRef.current.push(entry);

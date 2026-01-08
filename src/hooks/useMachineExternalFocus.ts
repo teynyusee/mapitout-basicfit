@@ -1,23 +1,33 @@
 import { useEffect } from "react";
 import type { RefObject } from "react";
 import type { MachineConfig } from "../data/machines";
-import * as THREE from "three";
 
 type MachineEntry = {
   machine: MachineConfig;
-  obj: THREE.Object3D;
   focused: boolean;
+  focusTimer: number;
+  blueFade: number;
 };
+
+const BLUE_ACTIVE_TIME = 3.5;
 
 export function useMachineExternalFocus(
   machinesRef: RefObject<MachineEntry[]>,
-  focusedMachineId?: string | null
+  focusedMachine?: { id: string | null; tick: number }
 ) {
   useEffect(() => {
-    if (!focusedMachineId) return;
+    if (!focusedMachine?.id) return;
 
     machinesRef.current?.forEach((m) => {
-      m.focused = m.machine.id === focusedMachineId;
+      const isTarget = m.machine.id === focusedMachine.id;
+
+      if (isTarget) {
+        // 🔥 ALTIJD resetten bij klik
+        m.focusTimer = BLUE_ACTIVE_TIME;
+        m.blueFade = 0;
+      }
+
+      m.focused = isTarget;
     });
-  }, [focusedMachineId, machinesRef]);
+  }, [focusedMachine?.tick]); // 👈 BELANGRIJK
 }

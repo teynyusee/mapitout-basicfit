@@ -33,14 +33,17 @@ type Props = {
     machine: MachineConfig,
     root: THREE.Object3D
   ) => void;
-  focusedMachineId?: string | null;
+  focusedMachine?: {
+    id: string | null;
+    tick: number;
+  };
 };
 
 export function SceneContents({
   activeZone,
   viewFactor,
   onMachineSelect,
-  focusedMachineId,
+  focusedMachine,
 }: Props) {
   /* ================= REFS ================= */
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -58,7 +61,9 @@ export function SceneContents({
   );
 
   useMachinesAnimation(machinesRef);
-  useMachineExternalFocus(machinesRef, focusedMachineId);
+
+  // ✅ ENIGE focus-bron (search / externe selectie)
+  useMachineExternalFocus(machinesRef, focusedMachine);
 
   /* ================= ZONE INTERACTION ================= */
   const zoneHandlers = useZoneHover(
@@ -67,8 +72,8 @@ export function SceneContents({
   );
 
   const machineInteractions = useMachineInteractions(
-  activeZone,
-  handleMachineSelect
+    activeZone,
+    handleMachineSelect
   );
 
   /* ================= LOGO ================= */
@@ -88,9 +93,8 @@ export function SceneContents({
     machine: MachineConfig,
     root: THREE.Object3D
   ) {
-    machinesRef.current.forEach((m) => {
-      m.focused = m.obj === root;
-    });
+    // ❌ GEEN focus-logica meer hier
+    // focus komt enkel van external focus (search)
 
     onMachineSelect(machine, root);
   }
@@ -104,7 +108,6 @@ export function SceneContents({
           if (logoHandlers.onHover(e)) return;
 
           machineInteractions.onPointerMove();
-
           zoneHandlers.onPointerMove(e);
         }}
         onPointerOut={(e) => {
@@ -115,7 +118,6 @@ export function SceneContents({
           if (logoHandlers.onClick(e)) return;
 
           machineInteractions.onClick();
-
           zoneHandlers.onClick(e);
         }}
       />

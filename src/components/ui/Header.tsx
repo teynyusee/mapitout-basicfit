@@ -1,5 +1,5 @@
 import { NavBar } from "./NavBar";
-import { MachineSearch } from "./MachineSearch";
+import { MachineSearch } from "./search/MachineSearch";
 import type { ZoneId } from "../../data/zones";
 
 export function Header({
@@ -9,7 +9,7 @@ export function Header({
 }: {
   activeZone?: ZoneId;
   onZoneChange: (zone: ZoneId) => void;
-  onFocusMachine: (id: string, zone: ZoneId) => void;
+  onFocusMachine: (id: string | null, zone: ZoneId) => void;
 }) {
   return (
     <div

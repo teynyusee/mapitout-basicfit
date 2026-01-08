@@ -3,7 +3,7 @@ import * as THREE from "three";
 
 import { GymCanvas } from "./components/canvas/GymCanvas";
 import { SceneContents } from "./components/scenes/SceneContents";
-import { MachineInfoModal } from "./components/ui/MachineInfoCard";
+import { MachineInfoModal } from "./components/ui/machine-card/MachineInfoModal";
 import { Header } from "./components/ui/Header";
 
 import type { ZoneId } from "./data/zones";
@@ -22,8 +22,14 @@ export default function App() {
   const [selectedMachine, setSelectedMachine] =
     useState<SelectedMachine | null>(null);
 
-  const [focusedMachineId, setFocusedMachineId] =
-    useState<string | null>(null);
+  // ✅ FIX: focus mét tick
+  const [focusedMachine, setFocusedMachine] = useState<{
+    id: string | null;
+    tick: number;
+  }>({
+    id: null,
+    tick: 0,
+  });
 
   const [zoneViewFactors, setZoneViewFactors] =
     useState<Record<ZoneId, number>>({
@@ -39,7 +45,7 @@ export default function App() {
 
   const handleZoneChange = useCallback((zone: ZoneId) => {
     setActiveZone(zone);
-    setFocusedMachineId(null);
+    setFocusedMachine({ id: null, tick: 0 });
     setSelectedMachine(null);
     setZoneViewFactors((p) => ({
       ...p,
@@ -86,7 +92,7 @@ export default function App() {
           activeZone={activeZone}
           viewFactor={zoneViewFactors[activeZone]}
           onMachineSelect={handleMachineSelect}
-          focusedMachineId={focusedMachineId}
+          focusedMachine={focusedMachine}
         />
       </GymCanvas>
 
@@ -96,7 +102,13 @@ export default function App() {
           onZoneChange={handleZoneChange}
           onFocusMachine={(id, zone) => {
             setActiveZone(zone);
-            setFocusedMachineId(id);
+
+            // ✅ ELKE klik = nieuwe tick
+            setFocusedMachine((prev) => ({
+              id,
+              tick: prev.tick + 1,
+            }));
+
             setZoneViewFactors((p) => ({
               ...p,
               [zone]: 0,

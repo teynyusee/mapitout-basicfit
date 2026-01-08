@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { SCENE_CONFIG } from "../data/sceneConfig";
 import type { MachineEntry } from "./useMachinesSetup";
 
-const BLUE_ACTIVE_TIME = 3.5; // seconden dat blauw zichtbaar blijft
 const BLUE_FADE_SPEED = 1.6;
 
 const glowColor = new THREE.Color(SCENE_CONFIG.glowColor);
@@ -32,27 +31,15 @@ export function useMachinesAnimation(
         delta * 1.8
       );
 
-    /* ---------------- Blue glow timer ---------------- */
-
-      // Detect focus START (edge detection)
-      if (entry.focused && !entry.lastFocused) {
-        entry.focusTimer = BLUE_ACTIVE_TIME;
-      }
-
-      // Countdown
+      /* ---------------- Blue fade ---------------- */
       entry.focusTimer = Math.max(0, entry.focusTimer - delta);
 
-      // Fade logic
       const blueTarget = entry.focusTimer > 0 ? 1 : 0;
       entry.blueFade = THREE.MathUtils.lerp(
         entry.blueFade,
         blueTarget,
         delta * BLUE_FADE_SPEED
       );
-
-      // Store previous state
-      entry.lastFocused = entry.focused;
-
 
       const a = entry.activation;
       const f = entry.focusIntensity;
