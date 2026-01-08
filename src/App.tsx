@@ -3,17 +3,12 @@ import * as THREE from "three";
 
 import { GymCanvas } from "./components/canvas/GymCanvas";
 import { SceneContents } from "./components/scenes/SceneContents";
-import { LogoScene } from "./components/intro/LogoScene";
-import { IntroCamera } from "./hooks/useIntroCamera";
 import { MachineInfoModal } from "./components/ui/MachineInfoCard";
 import { Header } from "./components/ui/Header";
-
 
 import type { ZoneId } from "./data/zones";
 import type { MachineConfig } from "./data/machines";
 import { CAMERA_NAMES } from "./data/cameras";
-
-type ViewMode = "intro" | "map";
 
 type SelectedMachine = {
   machine: MachineConfig;
@@ -21,17 +16,18 @@ type SelectedMachine = {
 };
 
 export default function App() {
-  const [viewMode, setViewMode] = useState<ViewMode>("intro");
-  const [logoFadingOut, setLogoFadingOut] = useState(false);
-
   const [activeZone, setActiveZone] =
-    useState<ZoneId>("overview");
+    useState<ZoneId>("home");
 
   const [selectedMachine, setSelectedMachine] =
     useState<SelectedMachine | null>(null);
 
+  const [focusedMachineId, setFocusedMachineId] =
+    useState<string | null>(null);
+
   const [zoneViewFactors, setZoneViewFactors] =
     useState<Record<ZoneId, number>>({
+      home: 0,
       overview: 0,
       cardio: 0,
       strength: 0,
@@ -41,13 +37,9 @@ export default function App() {
 
   const sliderRAF = useRef<number | null>(null);
 
-  const handleStart = useCallback(() => {
-    setLogoFadingOut(true);
-    setTimeout(() => setViewMode("map"), 1200);
-  }, []);
-
   const handleZoneChange = useCallback((zone: ZoneId) => {
     setActiveZone(zone);
+    setFocusedMachineId(null);
     setSelectedMachine(null);
     setZoneViewFactors((p) => ({
       ...p,
@@ -64,7 +56,8 @@ export default function App() {
 
   const handleSliderChange = useCallback(
     (value: number) => {
-      if (sliderRAF.current) cancelAnimationFrame(sliderRAF.current);
+      if (sliderRAF.current)
+        cancelAnimationFrame(sliderRAF.current);
 
       sliderRAF.current = requestAnimationFrame(() => {
         setZoneViewFactors((p) => ({
@@ -77,76 +70,68 @@ export default function App() {
   );
 
   useEffect(() => {
-  const handler = (e: any) => {
-    handleZoneChange(e.detail);
-  };
+    const handler = (e: any) => {
+      handleZoneChange(e.detail);
+    };
 
     window.addEventListener("zone-change", handler);
     return () =>
       window.removeEventListener("zone-change", handler);
   }, [handleZoneChange]);
 
-
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <GymCanvas>
-        {viewMode === "intro" && (
-          <>
-            <IntroCamera />
-            <LogoScene
-              onClick={handleStart}
-              fadingOut={logoFadingOut}
-            />
-          </>
-        )}
-
-        {viewMode === "map" && (
-          <SceneContents
-            activeZone={activeZone}
-            viewFactor={zoneViewFactors[activeZone]}
-            onMachineSelect={handleMachineSelect}
-            introFade
-          />
-        )}
+        <SceneContents
+          activeZone={activeZone}
+          viewFactor={zoneViewFactors[activeZone]}
+          onMachineSelect={handleMachineSelect}
+          focusedMachineId={focusedMachineId}
+        />
       </GymCanvas>
 
-      {viewMode === "map" && (
-  <>
-    <Header
-      activeZone={activeZone}
-      onZoneChange={handleZoneChange}
-    />
+      <>
+        <Header
+          activeZone={activeZone}
+          onZoneChange={handleZoneChange}
+          onFocusMachine={(id, zone) => {
+            setActiveZone(zone);
+            setFocusedMachineId(id);
+            setZoneViewFactors((p) => ({
+              ...p,
+              [zone]: 0,
+            }));
+          }}
+        />
 
-    {CAMERA_NAMES[activeZone]?.views && (
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={zoneViewFactors[activeZone]}
-        onChange={(e) =>
-          handleSliderChange(Number(e.target.value))
-        }
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 20,
-          width: 250,
-          zIndex: 20,
-        }}
-      />
-    )}
+        {CAMERA_NAMES[activeZone]?.views && (
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={zoneViewFactors[activeZone]}
+            onChange={(e) =>
+              handleSliderChange(Number(e.target.value))
+            }
+            style={{
+              position: "absolute",
+              bottom: 20,
+              left: 20,
+              width: 250,
+              zIndex: 20,
+            }}
+          />
+        )}
 
-    {selectedMachine && (
-      <MachineInfoModal
-        machine={selectedMachine.machine}
-        root={selectedMachine.root}
-        onClose={() => setSelectedMachine(null)}
-      />
-    )}
-  </>
-)}
-
+        {selectedMachine && (
+          <MachineInfoModal
+            machine={selectedMachine.machine}
+            root={selectedMachine.root}
+            onClose={() => setSelectedMachine(null)}
+          />
+        )}
+      </>
     </div>
   );
 }

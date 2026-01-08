@@ -1,17 +1,27 @@
 import { useEffect, useCallback, useRef } from "react";
 import * as THREE from "three";
-import { MACHINES } from "../data/machines";
+import { MACHINES, type MachineConfig } from "../data/machines";
 import { SCENE_CONFIG } from "../data/sceneConfig";
 import type { ZoneId } from "../data/zones";
 
 export type MachineEntry = {
+  machine: MachineConfig;
   obj: THREE.Object3D;
   baseY: number;
   meshes: THREE.Mesh[];
+
   active: boolean;
   activation: number;
+
   focused: boolean;
+  focusIntensity: number;
+
+  blueFade: number;
+  focusTimer: number; 
+  lastFocused: boolean;
+
 };
+
 
 export function useMachinesSetup(
   scene: THREE.Object3D,
@@ -35,37 +45,37 @@ export function useMachinesSetup(
           if (!(child as THREE.Mesh).isMesh) return;
 
           const mesh = child as THREE.Mesh;
-          mesh.material = (
-            mesh.material as THREE.Material
-          ).clone();
+          mesh.material = (mesh.material as THREE.Material).clone();
 
-          (
-            mesh.material as THREE.MeshStandardMaterial
-          ).emissive = new THREE.Color(
-            SCENE_CONFIG.glowColor
-          );
-
-          (
-            mesh.material as THREE.MeshStandardMaterial
-          ).emissiveIntensity = 0;
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          mat.emissive = new THREE.Color(SCENE_CONFIG.glowColor);
+          mat.emissiveIntensity = 0;
 
           meshes.push(mesh);
         });
 
         entry = {
+          machine,
           obj: root,
           baseY: root.position.y,
           meshes,
+
           active: false,
           activation: 0,
+
           focused: false,
+          focusIntensity: 0,
+
+          blueFade: 0,
+          focusTimer: 0, 
+          lastFocused: false,
         };
 
         machinesRef.current.push(entry);
       }
 
+      // zone visibility
       entry.active = machine.zone === activeZone;
-      entry.focused = false;
     });
   }, [scene, activeZone]);
 

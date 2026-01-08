@@ -8,12 +8,10 @@ export function useZoneHover(
   activeZone: ZoneId
 ) {
   const [hoveredZone, setHoveredZone] = useState<ZoneId | null>(null);
-
-  // 🧠 Onthoud welke meshes al een uniek material kregen
   const initialized = useRef<Set<THREE.Mesh>>(new Set());
 
   /**
-   * 🔧 INIT: clone material PER PLANE (1x)
+   * 1️⃣ Clone material per plane (1x)
    */
   useEffect(() => {
     scene.traverse((obj) => {
@@ -28,62 +26,85 @@ export function useZoneHover(
   }, [scene]);
 
   /**
-   * 🎨 KLEUR LOGICA
+   * 2️⃣ Visibility logic (colorWrite)
    */
-useEffect(() => {
-  scene.traverse((obj) => {
-    if (!(obj instanceof THREE.Mesh)) return;
-    if (!obj.name.endsWith("_plane")) return;
+  useEffect(() => {
+    scene.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh)) return;
+      if (!obj.name.endsWith("_plane")) return;
 
-    const zone = obj.name.replace("_plane", "") as ZoneId;
-    const material = obj.material as THREE.MeshStandardMaterial;
+      const zone = obj.name.replace("_plane", "") as ZoneId;
+      const material = obj.material as THREE.MeshStandardMaterial;
 
-    material.transparent = true;
+      material.transparent = true;
 
-    if (hoveredZone === zone) {
-      material.colorWrite = true;          // 👈 NU TEKENEN
-      material.opacity = 0.6;
-      material.color.set("#ff9f1c");
-    } else {
-      material.colorWrite = false;         // 👈 NIET TEKENEN
-      material.opacity = 0;                // safety
-    }
-  });
-}, [scene, hoveredZone]);
-
+      if (hoveredZone === zone) {
+        material.colorWrite = true;
+        material.opacity = 1;
+        material.color.set("#ff9f1c");
+      } else {
+        material.colorWrite = false;
+        material.opacity = 0;
+      }
+    });
+  }, [scene, hoveredZone]);
 
   /**
-   * 🖱️ POINTER MOVE
+   * 3️⃣ Hover detectie via intersections
    */
-  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
+    const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
+    if (activeZone !== "overview") return;
+
     const hit = e.intersections.find(
-      (i) =>
+        (i) =>
         i.object instanceof THREE.Mesh &&
         i.object.name.endsWith("_plane")
     );
 
     if (!hit) {
-      setHoveredZone(null);
-      document.body.style.cursor = "default";
-      return;
+        setHoveredZone(null);
+        document.body.style.cursor = "default";
+        return;
     }
 
-    const zone = hit.object.name.replace(
-      "_plane",
-      ""
-    ) as ZoneId;
-
+    const zone = hit.object.name.replace("_plane", "") as ZoneId;
     setHoveredZone(zone);
     document.body.style.cursor = "pointer";
-  };
+    };
 
-  const handlePointerOut = () => {
+
+  const onPointerOut = () => {
     setHoveredZone(null);
     document.body.style.cursor = "default";
   };
 
+  /**
+   * 4️⃣ CLICK → zone-change event (zelfde als NavBar)
+   */
+const onClick = (e: ThreeEvent<MouseEvent>) => {
+  if (activeZone !== "overview") return; // 👈 BLOKKEER CLICK
+
+  const hit = e.intersections.find(
+    (i) =>
+      i.object instanceof THREE.Mesh &&
+      i.object.name.endsWith("_plane")
+  );
+
+  if (!hit) return;
+
+  const zone = hit.object.name.replace("_plane", "") as ZoneId;
+
+  window.dispatchEvent(
+    new CustomEvent<ZoneId>("zone-change", {
+      detail: zone,
+    })
+  );
+};
+
+
   return {
-    onPointerMove: handlePointerMove,
-    onPointerOut: handlePointerOut,
+    onPointerMove,
+    onPointerOut,
+    onClick,
   };
 }

@@ -7,10 +7,12 @@ export const CAMERA_NAMES: Record<
     views?: string[];
   }
 > = {
+  home: {
+    main: "Camera_Logo",
+  },
   overview: {
     main: "Camera_Overview",
   },
-
   cardio: {
     main: "Camera_Cardio_A",
     views: ["Camera_Cardio_A", "Camera_Cardio_B"],

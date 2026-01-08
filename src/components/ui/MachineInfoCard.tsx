@@ -104,7 +104,6 @@ export function MachineInfoModal({ machine, root, onClose }: Props) {
               gap: 12,
             }}
           >
-            <Spec label="Difficulty" value={machine.info.difficulty} />
           </div>
 
           {/* Actions */}
@@ -156,23 +155,6 @@ function Tag({
     >
       {label}
     </span>
-  );
-}
-
-function Spec({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        background: theme.colors.primarySoft,
-        padding: "12px",
-        borderRadius: theme.radius.sm,
-      }}
-    >
-      <div style={{ fontSize: 12, color: theme.colors.textMuted }}>
-        {label}
-      </div>
-      <div style={{ fontWeight: theme.font.weight.bold }}>{value}</div>
-    </div>
   );
 }
 

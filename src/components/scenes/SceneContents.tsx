@@ -3,7 +3,7 @@ import {
   OrbitControls,
   useGLTF,
 } from "@react-three/drei";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -25,29 +25,42 @@ type Props = {
     machine: MachineConfig,
     root: THREE.Object3D
   ) => void;
+  focusedMachineId?: string | null;
+  focusFade?: number;
   introFade?: boolean;
 };
+
 
 export function SceneContents({
   activeZone,
   viewFactor,
   onMachineSelect,
+  focusedMachineId,
   introFade,
 }: Props) {
-  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const controlsRef =
+    useRef<OrbitControlsImpl | null>(null);
   const gltf = useGLTF("/models/gym_overview.glb");
 
   const fade = useRef(0);
 
   useZoneCamera(activeZone, gltf, controlsRef, viewFactor);
 
-  const machinesRef = useMachinesSetup(gltf.scene, activeZone);
-  useMachinesAnimation(machinesRef);
-
-  const { onPointerMove, onPointerOut } = useZoneHover(
+  const machinesRef = useMachinesSetup(
     gltf.scene,
     activeZone
   );
+  useMachinesAnimation(machinesRef);
+
+  const { onPointerMove, onPointerOut, onClick } =
+    useZoneHover(gltf.scene, activeZone);
+
+  useEffect(() => {
+    machinesRef.current.forEach((m) => {
+      m.focused =
+        focusedMachineId === m.machine.id;
+    });
+  }, [focusedMachineId, machinesRef]);
 
   const handleSelect = useCallback(
     (machine: MachineConfig, root: THREE.Object3D) => {
@@ -62,7 +75,11 @@ export function SceneContents({
   useFrame(() => {
     if (!introFade) return;
 
-    fade.current = THREE.MathUtils.lerp(fade.current, 1, 0.025);
+    fade.current = THREE.MathUtils.lerp(
+      fade.current,
+      1,
+      0.025
+    );
 
     gltf.scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -78,6 +95,7 @@ export function SceneContents({
         scene={gltf.scene}
         onPointerMove={onPointerMove}
         onPointerOut={onPointerOut}
+        onClick={onClick}
       />
 
       <MachineClickHandler

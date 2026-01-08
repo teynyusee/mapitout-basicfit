@@ -4,8 +4,6 @@ import type { ZoneId } from "./zones";
    TYPES
 ------------------------------------------------- */
 
-export type MachineDifficulty = "Beginner" | "Intermediate" | "Advanced";
-
 export type MachineConfig = {
   id: string;
   meshName: string;
@@ -14,12 +12,13 @@ export type MachineConfig = {
   info: {
     title: string;
     description: string;
-
-    // UI / extra info
     category: string;
     tags: string[];
-    difficulty: MachineDifficulty;
     muscleGroups: string[];
+  };
+
+  ui?: {
+    thumbnail: string;
   };
 
   previewCamera?: {
@@ -27,6 +26,7 @@ export type MachineConfig = {
     fov?: number;
   };
 };
+
 
 /* -------------------------------------------------
    MACHINES
@@ -43,12 +43,10 @@ export const MACHINES: MachineConfig[] = [
       description: "Ideaal voor cardio en conditie.",
       category: "Cardio",
       tags: ["Running", "Endurance", "Fat Burn"],
-      difficulty: "Beginner",
       muscleGroups: ["Legs", "Cardio"],
     },
-    previewCamera: {
-      position: [0, 1.1, 2.4],
-      fov: 38,
+    ui: {
+      thumbnail: "/images/machines/treadmill.png",
     },
   },
   {
@@ -60,7 +58,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Versterkt benen en billen.",
       category: "Cardio",
       tags: ["Stairs", "Glutes", "Endurance"],
-      difficulty: "Beginner",
       muscleGroups: ["Glutes", "Legs"],
     },
   },
@@ -73,7 +70,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Full-body cardio met lage impact.",
       category: "Cardio",
       tags: ["Low Impact", "Full Body"],
-      difficulty: "Beginner",
       muscleGroups: ["Legs", "Arms", "Cardio"],
     },
   },
@@ -89,7 +85,6 @@ export const MACHINES: MachineConfig[] = [
         "Gericht op de middelste schouderkop voor bredere schouders.",
       category: "Strength",
       tags: ["Shoulders", "Isolation"],
-      difficulty: "Intermediate",
       muscleGroups: ["Shoulders"],
     },
   },
@@ -102,7 +97,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Versterkt de onderrug en core-stabiliteit.",
       category: "Strength",
       tags: ["Lower Back", "Core"],
-      difficulty: "Beginner",
       muscleGroups: ["Lower Back", "Core"],
     },
   },
@@ -115,7 +109,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Isoleert de borstspieren en verbetert spierdefinitie.",
       category: "Strength",
       tags: ["Chest", "Isolation"],
-      difficulty: "Beginner",
       muscleGroups: ["Chest"],
     },
   },
@@ -128,7 +121,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Richt zich op de brede rugspieren (lats).",
       category: "Strength",
       tags: ["Back", "Lats"],
-      difficulty: "Beginner",
       muscleGroups: ["Back"],
     },
   },
@@ -142,7 +134,6 @@ export const MACHINES: MachineConfig[] = [
         "Isoleert de hamstrings aan de achterkant van de benen.",
       category: "Strength",
       tags: ["Legs", "Hamstrings"],
-      difficulty: "Beginner",
       muscleGroups: ["Hamstrings"],
     },
   },
@@ -156,7 +147,6 @@ export const MACHINES: MachineConfig[] = [
         "Gecontroleerde bicepstraining met constante spanning.",
       category: "Strength",
       tags: ["Arms", "Biceps"],
-      difficulty: "Beginner",
       muscleGroups: ["Biceps"],
     },
   },
@@ -170,7 +160,6 @@ export const MACHINES: MachineConfig[] = [
         "Krachttraining voor quadriceps, hamstrings en bilspieren.",
       category: "Strength",
       tags: ["Legs", "Compound"],
-      difficulty: "Beginner",
       muscleGroups: ["Quadriceps", "Glutes", "Hamstrings"],
     },
   },
@@ -183,13 +172,12 @@ export const MACHINES: MachineConfig[] = [
       description:
         "Gecontroleerde borsttraining met vaste bewegingsbaan.",
       category: "Strength",
-      tags: ["Chest", "Push"],
-      difficulty: "Beginner",
+      tags: ["Chest", "Compound"],
       muscleGroups: ["Chest", "Triceps"],
     },
   },
 
-  // 🏋️ FREE WEIGHTS / FUNCTIONAL
+// FREE WEIGHTS / FUNCTIONAL
   {
     id: "aerobic-mat",
     meshName: "SM__AerobicMat",
@@ -200,7 +188,6 @@ export const MACHINES: MachineConfig[] = [
         "Voor core-oefeningen, stretching en lichaamsgewichttraining.",
       category: "Functional",
       tags: ["Core", "Stretching"],
-      difficulty: "Beginner",
       muscleGroups: ["Core"],
     },
   },
@@ -214,7 +201,6 @@ export const MACHINES: MachineConfig[] = [
         "Vrije haltertraining voor compound lifts zoals squats en presses.",
       category: "Free Weights",
       tags: ["Barbell", "Compound"],
-      difficulty: "Advanced",
       muscleGroups: ["Full Body"],
     },
   },
@@ -228,7 +214,6 @@ export const MACHINES: MachineConfig[] = [
         "Bench met negatieve hoek voor onderste borstspieren.",
       category: "Free Weights",
       tags: ["Bench", "Chest"],
-      difficulty: "Intermediate",
       muscleGroups: ["Chest"],
     },
   },
@@ -242,7 +227,6 @@ export const MACHINES: MachineConfig[] = [
         "Klassieke barbell oefening voor borst, schouders en triceps.",
       category: "Free Weights",
       tags: ["Bench Press", "Compound"],
-      difficulty: "Advanced",
       muscleGroups: ["Chest", "Shoulders", "Triceps"],
     },
   },
@@ -255,7 +239,6 @@ export const MACHINES: MachineConfig[] = [
       description: "Richt zich op de bovenste borstspieren.",
       category: "Free Weights",
       tags: ["Upper Chest"],
-      difficulty: "Intermediate",
       muscleGroups: ["Upper Chest"],
     },
   },
@@ -271,7 +254,6 @@ export const MACHINES: MachineConfig[] = [
         "Vrije gewichten voor isolatie- en compound oefeningen.",
       category: "Dumbbells",
       tags: ["Free Weights"],
-      difficulty: "Beginner",
       muscleGroups: ["Full Body"],
     },
   },

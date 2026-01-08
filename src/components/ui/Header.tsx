@@ -1,15 +1,15 @@
 import { NavBar } from "./NavBar";
+import { MachineSearch } from "./MachineSearch";
 import type { ZoneId } from "../../data/zones";
-
-
-
 
 export function Header({
   activeZone,
   onZoneChange,
+  onFocusMachine,
 }: {
   activeZone?: ZoneId;
   onZoneChange: (zone: ZoneId) => void;
+  onFocusMachine: (id: string, zone: ZoneId) => void;
 }) {
   return (
     <div
@@ -28,16 +28,16 @@ export function Header({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 28,
+          gap: 16,
           pointerEvents: "auto",
         }}
       >
-
-        {/* NAVBAR */}
         <NavBar
           activeZone={activeZone}
           onZoneChange={onZoneChange}
         />
+
+        <MachineSearch onFocusMachine={onFocusMachine} />
       </div>
     </div>
   );

@@ -6,12 +6,14 @@ type Props = {
   scene: THREE.Object3D;
   onPointerMove?: (e: ThreeEvent<PointerEvent>) => void;
   onPointerOut?: () => void;
+  onClick?: (e: ThreeEvent<MouseEvent>) => void;
 };
 
 export function ParallaxScene({
   scene,
   onPointerMove,
   onPointerOut,
+  onClick,
 }: Props) {
   const groupRef = useRef<THREE.Group>(null);
   const { pointer } = useThree();
@@ -37,6 +39,7 @@ export function ParallaxScene({
       ref={groupRef}
       onPointerMove={onPointerMove}
       onPointerOut={onPointerOut}
+      onClick={onClick}
     >
       <primitive object={scene} />
     </group>
