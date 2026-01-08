@@ -4,8 +4,10 @@ export const theme = {
     surface: "#121212",
     surfaceGlass: "rgba(15,15,15,0.65)",
 
+
     primary: "#ff8a00",
     primarySoft: "#ffb347",
+    selectColor: "#2aa8ff",
 
     textMain: "#ffffff",
     textMuted: "rgba(255,255,255,0.75)",

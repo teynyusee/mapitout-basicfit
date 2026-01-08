@@ -12,6 +12,7 @@ export const CAMERA_NAMES: Record<
   },
   overview: {
     main: "Camera_Overview",
+    views: ["Camera_Overview", "Camera_Up"],
   },
   cardio: {
     main: "Camera_Cardio_A",

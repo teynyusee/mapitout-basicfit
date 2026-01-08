@@ -1,6 +1,9 @@
+import { theme } from "../styles/theme";
+import * as THREE from "three";
+
 export const SCENE_CONFIG = {
-  glowColor: "#ff8a00",
-  searchGlowColor: "#2aa8ff",
+  glowColor: new THREE.Color(theme.colors.primary),
+  selectedMachine: new THREE.Color(theme.colors.selectColor),
 
   maxGlowIntensity: 0.35,
 
@@ -9,4 +12,4 @@ export const SCENE_CONFIG = {
   rotationAmount: 0.08,
 
   activationSpeed: 1.2,
-};
+} as const;

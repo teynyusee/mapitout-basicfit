@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import type { ThreeEvent } from "@react-three/fiber";
 import type { ZoneId } from "../data/zones";
+import { theme } from "../styles/theme";
+
+const zoneHoverColor = new THREE.Color(theme.colors.primarySoft);
 
 export function useZoneHover(
   scene: THREE.Object3D,
@@ -21,12 +24,16 @@ export function useZoneHover(
       if (!initialized.current.has(obj)) {
         obj.material = (obj.material as THREE.Material).clone();
         initialized.current.add(obj);
+
+        // init fade data
+        obj.userData.currentOpacity = 0;
+        obj.userData.opacityTarget = 0;
       }
     });
   }, [scene]);
 
   /**
-   * 2️⃣ Visibility logic (colorWrite)
+   * 2️⃣ Set opacity TARGETS (geen animatie hier)
    */
   useEffect(() => {
     scene.traverse((obj) => {
@@ -34,44 +41,69 @@ export function useZoneHover(
       if (!obj.name.endsWith("_plane")) return;
 
       const zone = obj.name.replace("_plane", "") as ZoneId;
-      const material = obj.material as THREE.MeshStandardMaterial;
 
-      material.transparent = true;
-
-      if (hoveredZone === zone) {
-        material.colorWrite = true;
-        material.opacity = 1;
-        material.color.set("#ff9f1c");
-      } else {
-        material.colorWrite = false;
-        material.opacity = 0;
-      }
+      obj.userData.opacityTarget =
+        hoveredZone === zone ? 1 : 0;
     });
   }, [scene, hoveredZone]);
 
   /**
-   * 3️⃣ Hover detectie via intersections
+   * 3️⃣ Smooth fade animation
    */
-    const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
+  useEffect(() => {
+    let frameId: number;
+
+    const animate = () => {
+      scene.traverse((obj) => {
+        if (!(obj instanceof THREE.Mesh)) return;
+        if (!obj.name.endsWith("_plane")) return;
+
+        const material = obj.material as THREE.MeshStandardMaterial;
+        material.transparent = true;
+
+        // kleur blijft altijd theme-based
+        material.color.copy(zoneHoverColor);
+
+        obj.userData.currentOpacity = THREE.MathUtils.lerp(
+          obj.userData.currentOpacity ?? 0,
+          obj.userData.opacityTarget ?? 0,
+          0.12 // 👈 fade snelheid (lager = trager)
+        );
+
+        material.opacity = obj.userData.currentOpacity;
+
+        material.colorWrite = material.opacity > 0.01;
+      });
+
+      frameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+    return () => cancelAnimationFrame(frameId);
+  }, [scene]);
+
+  /**
+   * 4️⃣ Hover detectie
+   */
+  const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
     if (activeZone !== "overview") return;
 
     const hit = e.intersections.find(
-        (i) =>
+      (i) =>
         i.object instanceof THREE.Mesh &&
         i.object.name.endsWith("_plane")
     );
 
     if (!hit) {
-        setHoveredZone(null);
-        document.body.style.cursor = "default";
-        return;
+      setHoveredZone(null);
+      document.body.style.cursor = "default";
+      return;
     }
 
     const zone = hit.object.name.replace("_plane", "") as ZoneId;
     setHoveredZone(zone);
     document.body.style.cursor = "pointer";
-    };
-
+  };
 
   const onPointerOut = () => {
     setHoveredZone(null);
@@ -79,32 +111,42 @@ export function useZoneHover(
   };
 
   /**
-   * 4️⃣ CLICK → zone-change event (zelfde als NavBar)
+   * 5️⃣ CLICK → zone-change + fade out
    */
-const onClick = (e: ThreeEvent<MouseEvent>) => {
-  if (activeZone !== "overview") return; // 👈 BLOKKEER CLICK
+  const onClick = (e: ThreeEvent<MouseEvent>) => {
+    if (activeZone !== "overview") return;
 
-  const hit = e.intersections.find(
-    (i) =>
-      i.object instanceof THREE.Mesh &&
-      i.object.name.endsWith("_plane")
-  );
+    const hit = e.intersections.find(
+      (i) =>
+        i.object instanceof THREE.Mesh &&
+        i.object.name.endsWith("_plane")
+    );
 
-  if (!hit) return;
+    if (!hit) return;
 
-  const zone = hit.object.name.replace("_plane", "") as ZoneId;
+    // 👇 trigger fade out
+    setHoveredZone(null);
 
-  window.dispatchEvent(
-    new CustomEvent<ZoneId>("zone-change", {
-      detail: zone,
-    })
-  );
-};
+    const zone = hit.object.name.replace("_plane", "") as ZoneId;
 
+    window.dispatchEvent(
+      new CustomEvent<ZoneId>("zone-change", {
+        detail: zone,
+      })
+    );
+  };
 
   return {
-    onPointerMove,
-    onPointerOut,
-    onClick,
+  onPointerMove: onPointerMove as (
+    e: ThreeEvent<PointerEvent>
+  ) => void,
+
+  onPointerOut: onPointerOut as (
+    e?: ThreeEvent<PointerEvent>
+  ) => void,
+
+  onClick: onClick as (
+    e: ThreeEvent<MouseEvent>
+  ) => void,
   };
 }

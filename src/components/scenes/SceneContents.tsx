@@ -3,7 +3,7 @@ import {
   OrbitControls,
   useGLTF,
 } from "@react-three/drei";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -18,6 +18,14 @@ import { useMachinesSetup } from "../../hooks/useMachinesSetup";
 import { useMachinesAnimation } from "../../hooks/useMachinesAnimation";
 import { useZoneHover } from "../../hooks/useZoneHover";
 
+import { theme } from "../../styles/theme";
+
+import {
+  createLogoClickHandler,
+  createLogoHoverHandler,
+  createLogoHoverOutHandler,
+} from "../intro/LogoScene";
+
 type Props = {
   activeZone: ZoneId;
   viewFactor: number;
@@ -26,81 +34,109 @@ type Props = {
     root: THREE.Object3D
   ) => void;
   focusedMachineId?: string | null;
-  focusFade?: number;
   introFade?: boolean;
 };
 
+const logoHoverColor = new THREE.Color(
+  theme.colors.primarySoft
+);
 
 export function SceneContents({
   activeZone,
   viewFactor,
   onMachineSelect,
   focusedMachineId,
-  introFade,
 }: Props) {
   const controlsRef =
     useRef<OrbitControlsImpl | null>(null);
+
   const gltf = useGLTF("/models/gym_overview.glb");
 
-  const fade = useRef(0);
-
+  /* ---------------- CAMERA ---------------- */
   useZoneCamera(activeZone, gltf, controlsRef, viewFactor);
 
+  /* ---------------- MACHINES ---------------- */
   const machinesRef = useMachinesSetup(
     gltf.scene,
     activeZone
   );
   useMachinesAnimation(machinesRef);
 
-  const { onPointerMove, onPointerOut, onClick } =
-    useZoneHover(gltf.scene, activeZone);
-
+  /* 🔑 SYNC SEARCH / EXTERNAL FOCUS → MACHINE ENTRIES */
   useEffect(() => {
+    if (!focusedMachineId) return;
+
     machinesRef.current.forEach((m) => {
-      m.focused =
-        focusedMachineId === m.machine.id;
+      m.focused = m.machine.id === focusedMachineId;
     });
   }, [focusedMachineId, machinesRef]);
 
-  const handleSelect = useCallback(
-    (machine: MachineConfig, root: THREE.Object3D) => {
-      machinesRef.current.forEach((m) => {
-        m.focused = m.obj === root;
-      });
-      onMachineSelect(machine, root);
-    },
-    [onMachineSelect, machinesRef]
+  /* ---------------- ZONE HOVER ---------------- */
+  const { onPointerMove, onPointerOut, onClick } =
+    useZoneHover(gltf.scene, activeZone);
+
+  /* ---------------- LOGO HANDLERS ---------------- */
+  const logoClickHandler = useMemo(
+    () => createLogoClickHandler(),
+    []
+  );
+  const logoHoverHandler = useMemo(
+    () => createLogoHoverHandler(),
+    []
+  );
+  const logoHoverOutHandler = useMemo(
+    () => createLogoHoverOutHandler(),
+    []
   );
 
+  /* ---------------- LOGO HOVER ANIMATION ---------------- */
   useFrame(() => {
-    if (!introFade) return;
-
-    fade.current = THREE.MathUtils.lerp(
-      fade.current,
-      1,
-      0.025
-    );
-
     gltf.scene.traverse((obj) => {
-      if (!(obj instanceof THREE.Mesh)) return;
-      const mat = obj.material as THREE.Material;
-      mat.transparent = true;
-      mat.opacity = fade.current;
+      if (
+        !(obj instanceof THREE.Mesh) ||
+        obj.name !== "BASIC_FIT_LOGO"
+      )
+        return;
+
+      const mat = obj.material as THREE.Material & {
+        color?: THREE.Color;
+      };
+      if (!mat.color) return;
+
+      if (!obj.userData.baseColor) {
+        obj.userData.baseColor = mat.color.clone();
+      }
+
+      const targetColor = obj.userData.hover
+        ? logoHoverColor
+        : obj.userData.baseColor;
+
+      mat.color.lerp(targetColor, 0.08);
     });
   });
 
+  /* ---------------- SCENE ---------------- */
   return (
     <>
       <ParallaxScene
         scene={gltf.scene}
-        onPointerMove={onPointerMove}
-        onPointerOut={onPointerOut}
-        onClick={onClick}
+        onPointerMove={(e) => {
+          if (logoHoverHandler(e)) return;
+          onPointerMove(e);
+        }}
+        onPointerOut={(e) => {
+          logoHoverOutHandler(e);
+          onPointerOut(e);
+        }}
+        onClick={(e) => {
+          if (logoClickHandler(e)) return;
+          onClick(e);
+        }}
       />
 
       <MachineClickHandler
         activeZone={activeZone}
-        onSelect={handleSelect}
+        onSelect={handleMachineSelect}
       />
 
       <ContactShadows
@@ -115,4 +151,16 @@ export function SceneContents({
       <OrbitControls ref={controlsRef} enabled={false} />
     </>
   );
+
+  /* ---------------- MACHINE CLICK (SCENE) ---------------- */
+  function handleMachineSelect(
+    machine: MachineConfig,
+    root: THREE.Object3D
+  ) {
+    machinesRef.current.forEach((m) => {
+      m.focused = m.obj === root;
+    });
+
+    onMachineSelect(machine, root);
+  }
 }
