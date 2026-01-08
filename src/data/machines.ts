@@ -60,6 +60,9 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Stairs", "Glutes", "Endurance"],
       muscleGroups: ["Glutes", "Legs"],
     },
+    ui: {
+      thumbnail: "/images/machines/stepper.png",
+    },
   },
   {
     id: "elliptical",
@@ -72,9 +75,11 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Low Impact", "Full Body"],
       muscleGroups: ["Legs", "Arms", "Cardio"],
     },
+    ui: {
+      thumbnail: "/images/machines/elliptical.png",
+    },
   },
 
-  // 🏋️ STRENGTH MACHINES
   {
     id: "lateral-raises",
     meshName: "SM__LateralRaises",
@@ -86,6 +91,9 @@ export const MACHINES: MachineConfig[] = [
       category: "Strength",
       tags: ["Shoulders", "Isolation"],
       muscleGroups: ["Shoulders"],
+    },
+    ui: {
+      thumbnail: "/images/machines/lateral-raises.png",
     },
   },
   {
@@ -99,6 +107,9 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Lower Back", "Core"],
       muscleGroups: ["Lower Back", "Core"],
     },
+    ui: {
+      thumbnail: "/images/machines/lower-back.png",
+    },
   },
   {
     id: "pec-fly",
@@ -111,6 +122,9 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Chest", "Isolation"],
       muscleGroups: ["Chest"],
     },
+    ui: {
+      thumbnail: "/images/machines/pec-fly.png",
+    },
   },
   {
     id: "lat-pulldown",
@@ -122,6 +136,9 @@ export const MACHINES: MachineConfig[] = [
       category: "Strength",
       tags: ["Back", "Lats"],
       muscleGroups: ["Back"],
+    },
+    ui: {
+      thumbnail: "/images/machines/lat-pulldown.png",
     },
   },
   {
@@ -136,6 +153,9 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Legs", "Hamstrings"],
       muscleGroups: ["Hamstrings"],
     },
+    ui: {
+      thumbnail: "/images/machines/seated-leg-curl.png",
+    },
   },
   {
     id: "biceps-curl",
@@ -149,6 +169,9 @@ export const MACHINES: MachineConfig[] = [
       tags: ["Arms", "Biceps"],
       muscleGroups: ["Biceps"],
     },
+    ui: {
+      thumbnail: "/images/machines/biceps-curl.png",
+    },
   },
   {
     id: "leg-press",
@@ -161,6 +184,9 @@ export const MACHINES: MachineConfig[] = [
       category: "Strength",
       tags: ["Legs", "Compound"],
       muscleGroups: ["Quadriceps", "Glutes", "Hamstrings"],
+    },
+    ui: {
+      thumbnail: "/images/machines/leg-press.png",
     },
   },
   {

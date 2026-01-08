@@ -32,26 +32,26 @@ export function useMachinesAnimation(
         delta * 1.8
       );
 
-/* ---------------- Blue glow timer ---------------- */
+    /* ---------------- Blue glow timer ---------------- */
 
-  // Detect focus START (edge detection)
-  if (entry.focused && !entry.lastFocused) {
-    entry.focusTimer = BLUE_ACTIVE_TIME;
-  }
+      // Detect focus START (edge detection)
+      if (entry.focused && !entry.lastFocused) {
+        entry.focusTimer = BLUE_ACTIVE_TIME;
+      }
 
-  // Countdown
-  entry.focusTimer = Math.max(0, entry.focusTimer - delta);
+      // Countdown
+      entry.focusTimer = Math.max(0, entry.focusTimer - delta);
 
-  // Fade logic
-  const blueTarget = entry.focusTimer > 0 ? 1 : 0;
-  entry.blueFade = THREE.MathUtils.lerp(
-    entry.blueFade,
-    blueTarget,
-    delta * BLUE_FADE_SPEED
-  );
+      // Fade logic
+      const blueTarget = entry.focusTimer > 0 ? 1 : 0;
+      entry.blueFade = THREE.MathUtils.lerp(
+        entry.blueFade,
+        blueTarget,
+        delta * BLUE_FADE_SPEED
+      );
 
-  // Store previous state
-  entry.lastFocused = entry.focused;
+      // Store previous state
+      entry.lastFocused = entry.focused;
 
 
       const a = entry.activation;
