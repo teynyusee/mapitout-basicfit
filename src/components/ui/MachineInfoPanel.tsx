@@ -1,6 +1,5 @@
 import type { MachineConfig } from "../../data/machines";
 import { Tag } from "./Tag";
-import { Spec } from "./Spec";
 import { theme } from "../../styles/theme";
 
 type Props = {
@@ -77,10 +76,6 @@ export function MachineInfoPanel({
           gap: theme.spacing.sm,
         }}
       >
-        <Spec
-          label="Difficulty"
-          value={info.difficulty}
-        />
       </div>
 
       {/* Actions */}
