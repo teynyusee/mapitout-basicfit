@@ -4,13 +4,16 @@ import * as THREE from "three";
 
 type Props = {
   scene: THREE.Object3D;
+  children?: React.ReactNode;
   onPointerMove?: (e: ThreeEvent<PointerEvent>) => void;
-  onPointerOut?: (e: ThreeEvent<PointerEvent>) => void; // ✅ FIX
+  onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
   onClick?: (e: ThreeEvent<MouseEvent>) => void;
 };
 
+
 export function ParallaxScene({
   scene,
+  children,
   onPointerMove,
   onPointerOut,
   onClick,
@@ -38,10 +41,11 @@ export function ParallaxScene({
     <group
       ref={groupRef}
       onPointerMove={onPointerMove}
-      onPointerOut={onPointerOut}  
+      onPointerOut={onPointerOut}
       onClick={onClick}
     >
       <primitive object={scene} />
+      {children}
     </group>
   );
 }

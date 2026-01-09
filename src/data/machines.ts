@@ -17,6 +17,8 @@ export type MachineConfig = {
   ui?: {
     thumbnail: string;
   };
+
+  previewCamera?: { position: [number, number, number]; fov?: number; };
 };
 
 export const MACHINES: MachineConfig[] = ALL_MACHINES;
