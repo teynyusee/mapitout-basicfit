@@ -6,16 +6,12 @@ import { SceneContents } from "./components/scenes/SceneContents";
 import { MachineInfoModal } from "./components/ui/machine-card/MachineInfoModal";
 import { Header } from "./components/ui/Header";
 import { Cards } from "./components/ui/home-cards/Cards";
-
 import { ZoneViewSlider } from "./components/ui/ZoneViewSlider";
 import { VisualEffectsToggle } from "./components/ui/toggles/VisualEffectsToggle";
-
-
 
 import type { ZoneId } from "./data/zones";
 import type { MachineConfig } from "./data/machines";
 import { CAMERA_NAMES } from "./data/cameras";
-import { div } from "three/tsl";
 
 type SelectedMachine = {
   machine: MachineConfig;
@@ -23,13 +19,11 @@ type SelectedMachine = {
 };
 
 export default function App() {
-  const [activeZone, setActiveZone] =
-    useState<ZoneId>("home");
+  const [activeZone, setActiveZone] = useState<ZoneId>("home");
 
   const [selectedMachine, setSelectedMachine] =
     useState<SelectedMachine | null>(null);
 
-  // ✅ FIX: focus mét tick
   const [focusedMachine, setFocusedMachine] = useState<{
     id: string | null;
     tick: number;
@@ -39,8 +33,7 @@ export default function App() {
   });
 
   const [visualEffectsEnabled, setVisualEffectsEnabled] =
-  useState(true);
-
+    useState(true);
 
   const [zoneViewFactors, setZoneViewFactors] =
     useState<Record<ZoneId, number>>({
@@ -54,6 +47,8 @@ export default function App() {
 
   const sliderRAF = useRef<number | null>(null);
 
+  /* ===================== ZONE CHANGE ===================== */
+
   const handleZoneChange = useCallback((zone: ZoneId) => {
     setActiveZone(zone);
     setFocusedMachine({ id: null, tick: 0 });
@@ -64,6 +59,8 @@ export default function App() {
     }));
   }, []);
 
+  /* ===================== MACHINE SELECT ===================== */
+
   const handleMachineSelect = useCallback(
     (machine: MachineConfig, root: THREE.Object3D) => {
       setSelectedMachine({ machine, root });
@@ -71,10 +68,13 @@ export default function App() {
     []
   );
 
+  /* ===================== SLIDER ===================== */
+
   const handleSliderChange = useCallback(
     (value: number) => {
-      if (sliderRAF.current)
+      if (sliderRAF.current) {
         cancelAnimationFrame(sliderRAF.current);
+      }
 
       sliderRAF.current = requestAnimationFrame(() => {
         setZoneViewFactors((p) => ({
@@ -86,15 +86,22 @@ export default function App() {
     [activeZone]
   );
 
+  /* ===================== CUSTOM EVENT (NO ANY) ===================== */
+
   useEffect(() => {
-    const handler = (e: any) => {
-      handleZoneChange(e.detail);
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<ZoneId>;
+      handleZoneChange(customEvent.detail);
     };
 
     window.addEventListener("zone-change", handler);
-    return () =>
+
+    return () => {
       window.removeEventListener("zone-change", handler);
+    };
   }, [handleZoneChange]);
+
+  /* ===================== RENDER ===================== */
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -115,7 +122,6 @@ export default function App() {
           onFocusMachine={(id, zone) => {
             setActiveZone(zone);
 
-            // ✅ ELKE klik = nieuwe tick
             setFocusedMachine((prev) => ({
               id,
               tick: prev.tick + 1,
@@ -126,16 +132,14 @@ export default function App() {
               [zone]: 0,
             }));
           }}
-          
         />
 
-
-        {/* 👇 HOME CARDS */}
+        {/* HOME CARDS */}
         {activeZone === "home" && (
           <div
             style={{
               position: "absolute",
-              bottom: 60, 
+              bottom: 60,
               left: 0,
               right: 0,
               display: "flex",
@@ -144,22 +148,25 @@ export default function App() {
               pointerEvents: "auto",
             }}
           >
-            <Cards onSelectZone={handleZoneChange} activeZone={"overview"} />
+            <Cards
+              activeZone={"overview"}
+              onSelectZone={handleZoneChange}
+            />
           </div>
         )}
 
         {CAMERA_NAMES[activeZone]?.views && (
           <div className="Slider-Effects">
-          <ZoneViewSlider
-            value={zoneViewFactors[activeZone]}
-            onChange={handleSliderChange}
-          />
-          <VisualEffectsToggle
-            enabled={visualEffectsEnabled}
-            onToggle={() =>
-              setVisualEffectsEnabled((v) => !v)
-            }
-          />
+            <ZoneViewSlider
+              value={zoneViewFactors[activeZone]}
+              onChange={handleSliderChange}
+            />
+            <VisualEffectsToggle
+              enabled={visualEffectsEnabled}
+              onToggle={() =>
+                setVisualEffectsEnabled((v) => !v)
+              }
+            />
           </div>
         )}
 

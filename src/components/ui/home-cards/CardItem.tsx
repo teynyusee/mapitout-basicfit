@@ -1,11 +1,11 @@
-import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
+import type { ComponentType, SVGProps } from "react";
 import { theme } from "../../../styles/theme";
 
 type Props = {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: ComponentType<SVGProps<SVGSVGElement> & { size?: number }>;
   active: boolean;
   onClick: () => void;
 };
@@ -27,12 +27,11 @@ export function CardItem({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: 270, 
+        width: 270,
         padding: "18px 20px",
         borderRadius: theme.radius.lg,
         cursor: "pointer",
 
-        /* ===== BACKGROUND ===== */
         background: isHighlighted
           ? theme.colors.hoverBlue
           : theme.colors.surfaceGlass,
@@ -40,26 +39,22 @@ export function CardItem({
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
 
-        /* ===== BORDER ===== */
         border: `1px solid ${
           isHighlighted
             ? theme.colors.selectColor
             : theme.colors.primary
         }`,
 
-        /* ===== SHADOW / GLOW ===== */
         boxShadow: isHighlighted
           ? theme.colors.selectColor
           : theme.shadow.soft,
 
-        /* ===== MOTION ===== */
         transform: isHighlighted
           ? "translateY(-6px)"
           : "translateY(0)",
-        transition:
-          "all 0.25s ease",
 
-        /* ===== LAYOUT ===== */
+        transition: "all 0.25s ease",
+
         display: "flex",
         flexDirection: "column",
         gap: 10,
