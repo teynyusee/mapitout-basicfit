@@ -51,7 +51,7 @@ export const DUMBBELL_MACHINES: MachineConfig[] = [
   },
   {
     id: "leg-press",
-    meshName: "SM_LegPress__main",
+    meshName: "SM__LegPress__main",
     zone: "dumbbells",
     info: {
       title: "Leg Press",

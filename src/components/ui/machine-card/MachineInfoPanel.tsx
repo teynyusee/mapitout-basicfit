@@ -16,11 +16,11 @@ export function MachineInfoPanel({ machine }: Props) {
         padding: theme.spacing.lg,
         display: "flex",
         flexDirection: "column",
-        gap: theme.spacing.md,
+        gap: theme.spacing.lg,
         background: theme.colors.surface,
       }}
     >
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <div>
         <span
           style={{
@@ -48,21 +48,24 @@ export function MachineInfoPanel({ machine }: Props) {
           {info.title}
         </h2>
 
-        <div
-          style={{
-            display: "flex",
-            gap: theme.spacing.xs,
-            marginTop: theme.spacing.sm,
-            flexWrap: "wrap",
-          }}
-        >
-          {info.tags.map((tag) => (
-            <Tag key={tag} label={tag} />
-          ))}
-        </div>
+        {/* ALGEMENE TAGS */}
+        {info.tags?.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              gap: theme.spacing.xs,
+              marginTop: theme.spacing.sm,
+              flexWrap: "wrap",
+            }}
+          >
+            {info.tags.map((tag) => (
+              <Tag key={tag} label={tag} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Description */}
+      {/* ================= DESCRIPTION ================= */}
       <p
         style={{
           margin: 0,
@@ -73,6 +76,45 @@ export function MachineInfoPanel({ machine }: Props) {
       >
         {info.description}
       </p>
+
+      {/* ================= MUSCLE GROUPS ================= */}
+      {info.muscleGroups?.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.spacing.sm,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: theme.font.weight.semibold,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: theme.colors.textMuted,
+            }}
+          >
+            Spiergroepen
+          </span>
+
+          <div
+            style={{
+              display: "flex",
+              gap: theme.spacing.xs,
+              flexWrap: "wrap",
+            }}
+          >
+            {info.muscleGroups.map((muscle) => (
+              <Tag
+                key={muscle}
+                label={muscle}
+                variant="category"
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

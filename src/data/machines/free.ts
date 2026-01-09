@@ -131,7 +131,7 @@ export const FREE_MACHINES: MachineConfig[] = [
   },
   {
     id: "kettlebell",
-    meshName: "SM_Kettle_Bell",
+    meshName: "SM__Kettlle__Bell",
     zone: "free",
     info: {
       title: "Kettlebell",
