@@ -5,9 +5,9 @@ export const theme = {
     surface: "#121212",
     surfaceGlass: "rgba(15,15,15,0.65)",
 
-    primary: "#ff8a00",
+    primary: "#FE7000",
     primarySoft: "#ffb347",
-    selectColor: "#2aa8ff",
+    selectColor: "#0AD5DD",
 
     textMain: "#ffffff",
     textMuted: "rgba(255,255,255,0.75)",
@@ -17,12 +17,18 @@ export const theme = {
 
     overlayDark:
       "radial-gradient(circle at center, rgba(0,0,0,0.55), rgba(0,0,0,0.85))",
+
+    hoverBlue:
+      "radial-gradient(circle at center, #0AD5DD, rgba(146, 191, 255, 0.66))",
+
+    boxBlue:
+      "0 6px 16px #0ad6dda6",
   },
 
   /* ================= GRADIENTS ================= */
   gradients: {
     primary:
-      "linear-gradient(135deg, #ff8a00, #ffb347)",
+      "linear-gradient(135deg, #FE7000, #ffb347)",
     subtleSurface:
       "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2))",
   },
@@ -54,7 +60,7 @@ export const theme = {
   button: {
     primary: {
       background:
-        "linear-gradient(135deg, #ff8a00, #ffb347)",
+        "linear-gradient(135deg, #FE7000, #ffb347)",
       color: "#111",
       border: "none",
       fontWeight: 700,
@@ -91,7 +97,7 @@ export const theme = {
     weight: {
       regular: 400,
       medium: 500,
-      bold: 700,
+      semibold: 700,
     },
   },
 } as const;

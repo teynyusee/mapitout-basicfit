@@ -27,12 +27,12 @@ export function ParallaxScene({
 
     group.rotation.x = THREE.MathUtils.lerp(
       group.rotation.x,
-      pointer.y * 0.02,
+      pointer.y * 0.05,
       delta * 6
     );
     group.rotation.y = THREE.MathUtils.lerp(
       group.rotation.y,
-      pointer.x * 0.1,
+      pointer.x * 0.05,
       delta * 6
     );
   });

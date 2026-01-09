@@ -18,6 +18,7 @@ import { useMachinesAnimation } from "../../hooks/useMachinesAnimation";
 import { useZoneHover } from "../../hooks/useZoneHover";
 import { useLogoAnimation } from "../../hooks/useLogoAnimation";
 import { useMachineExternalFocus } from "../../hooks/useMachineExternalFocus";
+import { useMachineHoverFocus } from "../../hooks/useMachineHoverFocus";
 
 import {
   createLogoClickHandler,
@@ -37,6 +38,7 @@ type Props = {
     id: string | null;
     tick: number;
   };
+  visualEffectsEnabled: boolean;
 };
 
 export function SceneContents({
@@ -44,28 +46,28 @@ export function SceneContents({
   viewFactor,
   onMachineSelect,
   focusedMachine,
+  visualEffectsEnabled,
 }: Props) {
-  /* ================= REFS ================= */
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
-
-  /* ================= ASSETS ================= */
   const gltf = useGLTF("/models/gym_overview.glb");
 
-  /* ================= CAMERA ================= */
+  /* CAMERA */
   useZoneCamera(activeZone, gltf, controlsRef, viewFactor);
 
-  /* ================= MACHINES ================= */
+  /* MACHINES */
   const machinesRef = useMachinesSetup(
     gltf.scene,
     activeZone
   );
 
-  useMachinesAnimation(machinesRef);
-
-  // ✅ ENIGE focus-bron (search / externe selectie)
+  useMachinesAnimation(machinesRef, visualEffectsEnabled);
   useMachineExternalFocus(machinesRef, focusedMachine);
 
-  /* ================= ZONE INTERACTION ================= */
+  /* 🔵 HOVER BLUE */
+  const handleMachineHover =
+    useMachineHoverFocus(machinesRef);
+
+  /* ZONES */
   const zoneHandlers = useZoneHover(
     gltf.scene,
     activeZone
@@ -73,10 +75,11 @@ export function SceneContents({
 
   const machineInteractions = useMachineInteractions(
     activeZone,
-    handleMachineSelect
+    handleMachineSelect,
+    handleMachineHover
   );
 
-  /* ================= LOGO ================= */
+  /* LOGO */
   useLogoAnimation(gltf.scene, activeZone);
 
   const logoHandlers = useMemo(
@@ -88,18 +91,13 @@ export function SceneContents({
     []
   );
 
-  /* ================= MACHINE CLICK ================= */
   function handleMachineSelect(
     machine: MachineConfig,
     root: THREE.Object3D
   ) {
-    // ❌ GEEN focus-logica meer hier
-    // focus komt enkel van external focus (search)
-
     onMachineSelect(machine, root);
   }
 
-  /* ================= SCENE ================= */
   return (
     <>
       <ParallaxScene

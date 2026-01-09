@@ -7,7 +7,10 @@ type NavBarProps = {
   onZoneChange: (zone: ZoneId) => void;
 };
 
-export function NavBar({ activeZone, onZoneChange }: NavBarProps) {
+export function NavBar({
+  activeZone,
+  onZoneChange,
+}: NavBarProps) {
   return (
     <nav
       style={{
@@ -33,6 +36,10 @@ export function NavBar({ activeZone, onZoneChange }: NavBarProps) {
   );
 }
 
+/* ===============================
+   NAV BUTTON
+   =============================== */
+
 function NavButton({
   label,
   active,
@@ -44,12 +51,24 @@ function NavButton({
 }) {
   const ref = useRef<HTMLButtonElement>(null);
 
-  function handlePointerMove(e: React.PointerEvent) {
+  /* ===============================
+     POINTER MOVE (3D TILT)
+     =============================== */
+  function handlePointerMove(
+    e: React.PointerEvent
+  ) {
     if (!ref.current) return;
 
-    const rect = ref.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const rect =
+      ref.current.getBoundingClientRect();
+    const x =
+      (e.clientX - rect.left) /
+        rect.width -
+      0.5;
+    const y =
+      (e.clientY - rect.top) /
+        rect.height -
+      0.5;
 
     ref.current.style.transform = `
       perspective(800px)
@@ -59,6 +78,25 @@ function NavButton({
     `;
   }
 
+  /* ===============================
+     HOVER IN
+     =============================== */
+  function handlePointerEnter() {
+    if (!ref.current || active) return;
+
+    ref.current.style.background =
+      theme.colors.hoverBlue;
+
+    ref.current.style.boxShadow =
+      theme.colors.boxBlue;
+
+    ref.current.style.color =
+      theme.colors.textMain;
+  }
+
+  /* ===============================
+     RESET (HOVER OUT)
+     =============================== */
   function reset() {
     if (!ref.current) return;
 
@@ -68,31 +106,55 @@ function NavButton({
       rotateY(0deg)
       translateZ(${active ? 12 : 0}px)
     `;
+
+    if (!active) {
+      ref.current.style.background =
+        "none";
+      ref.current.style.boxShadow =
+        "none";
+      ref.current.style.color =
+        theme.colors.textMuted;
+    }
   }
 
+  /* ===============================
+     RENDER
+     =============================== */
   return (
     <button
       ref={ref}
       onClick={onClick}
+      onPointerEnter={handlePointerEnter}
       onPointerMove={handlePointerMove}
       onPointerLeave={reset}
-      onFocus={(e) => e.currentTarget.blur()}
+      onFocus={(e) =>
+        e.currentTarget.blur()
+      }
       style={{
-        padding: "10px 22px", // 👈 consistenter
+        padding: "10px 22px",
         borderRadius: theme.radius.pill,
         border: "none",
+
         background: active
           ? `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primarySoft})`
-          : "transparent",
-        color: active ? "#111" : theme.colors.textMuted,
+          : "none",
+
+        color: active
+          ? "#111"
+          : theme.colors.textMuted,
+
         fontFamily: theme.font.family,
         fontSize: "0.9rem",
-        fontWeight: theme.font.weight.medium,
+        fontWeight:
+          theme.font.weight.medium,
         letterSpacing: "0.04em",
+
         cursor: "pointer",
+
         boxShadow: active
           ? "0 8px 18px rgba(255,138,0,0.4)"
-          : "0 3px 10px rgba(0,0,0,0.25)",
+          : "none",
+
         transition:
           "transform 0.12s ease-out, box-shadow 0.15s ease, background 0.25s ease, color 0.25s ease",
       }}

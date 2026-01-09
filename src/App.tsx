@@ -5,10 +5,17 @@ import { GymCanvas } from "./components/canvas/GymCanvas";
 import { SceneContents } from "./components/scenes/SceneContents";
 import { MachineInfoModal } from "./components/ui/machine-card/MachineInfoModal";
 import { Header } from "./components/ui/Header";
+import { Cards } from "./components/ui/home-cards/Cards";
+
+import { ZoneViewSlider } from "./components/ui/ZoneViewSlider";
+import { VisualEffectsToggle } from "./components/ui/toggles/VisualEffectsToggle";
+
+
 
 import type { ZoneId } from "./data/zones";
 import type { MachineConfig } from "./data/machines";
 import { CAMERA_NAMES } from "./data/cameras";
+import { div } from "three/tsl";
 
 type SelectedMachine = {
   machine: MachineConfig;
@@ -30,6 +37,10 @@ export default function App() {
     id: null,
     tick: 0,
   });
+
+  const [visualEffectsEnabled, setVisualEffectsEnabled] =
+  useState(true);
+
 
   const [zoneViewFactors, setZoneViewFactors] =
     useState<Record<ZoneId, number>>({
@@ -93,6 +104,7 @@ export default function App() {
           viewFactor={zoneViewFactors[activeZone]}
           onMachineSelect={handleMachineSelect}
           focusedMachine={focusedMachine}
+          visualEffectsEnabled={visualEffectsEnabled}
         />
       </GymCanvas>
 
@@ -114,26 +126,41 @@ export default function App() {
               [zone]: 0,
             }));
           }}
+          
         />
 
-        {CAMERA_NAMES[activeZone]?.views && (
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={zoneViewFactors[activeZone]}
-            onChange={(e) =>
-              handleSliderChange(Number(e.target.value))
-            }
+
+        {/* 👇 HOME CARDS */}
+        {activeZone === "home" && (
+          <div
             style={{
               position: "absolute",
-              bottom: 20,
-              left: 20,
-              width: 250,
-              zIndex: 20,
+              bottom: 60, 
+              left: 0,
+              right: 0,
+              display: "flex",
+              justifyContent: "center",
+              zIndex: 15,
+              pointerEvents: "auto",
             }}
+          >
+            <Cards onSelectZone={handleZoneChange} activeZone={"overview"} />
+          </div>
+        )}
+
+        {CAMERA_NAMES[activeZone]?.views && (
+          <div className="Slider-Effects">
+          <ZoneViewSlider
+            value={zoneViewFactors[activeZone]}
+            onChange={handleSliderChange}
           />
+          <VisualEffectsToggle
+            enabled={visualEffectsEnabled}
+            onToggle={() =>
+              setVisualEffectsEnabled((v) => !v)
+            }
+          />
+          </div>
         )}
 
         {selectedMachine && (

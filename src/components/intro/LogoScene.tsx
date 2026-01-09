@@ -29,7 +29,6 @@ export function createLogoHoverHandler() {
     if (obj?.name !== "BASIC_FIT_LOGO") return false;
 
     document.body.style.cursor = "pointer";
-
     obj.userData.hover = true;
 
     return true;
@@ -45,7 +44,6 @@ export function createLogoHoverOutHandler() {
     if (obj?.name !== "BASIC_FIT_LOGO") return false;
 
     document.body.style.cursor = "default";
-
     obj.userData.hover = false;
 
     return true;

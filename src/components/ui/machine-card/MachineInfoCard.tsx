@@ -76,7 +76,7 @@ export function MachineInfoModal({ machine, root, onClose }: Props) {
               style={{
                 display: "inline-block",
                 fontSize: 12,
-                fontWeight: theme.font.weight.bold,
+                fontWeight: theme.font.weight.semibold,
                 letterSpacing: 0.6,
                 textTransform: "uppercase",
                 color: theme.colors.primary,
@@ -92,7 +92,7 @@ export function MachineInfoModal({ machine, root, onClose }: Props) {
                 fontSize: 28,
                 lineHeight: 1.2,
                 fontFamily: theme.font.family,
-                fontWeight: theme.font.weight.bold,
+                fontWeight: theme.font.weight.semibold,
               }}
             >
               {machine.info.title}

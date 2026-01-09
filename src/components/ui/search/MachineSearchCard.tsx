@@ -1,4 +1,6 @@
 import type { MachineConfig } from "../../../data/machines";
+import { theme } from "../../../styles/theme";
+import { useState } from "react";
 
 type Props = {
   machine: MachineConfig;
@@ -6,54 +8,79 @@ type Props = {
 };
 
 export function MachineSearchCard({ machine, onClick }: Props) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <div
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: "flex",
         gap: 12,
         padding: "10px 12px",
-        borderRadius: 12,
+        borderRadius: 14,
         cursor: "pointer",
-        background: "#0f0f0f",
-        transition: "background 0.15s",
         alignItems: "center",
+
+        background: hovered
+          ? theme.colors.hoverBlue
+          : "transparent",
+
+        border: `1px solid ${
+          hovered
+            ? theme.colors.selectColor
+            : "transparent"
+        }`,
+
+        boxShadow: hovered
+          ? theme.colors.boxBlue
+          : "none",
+
+        transition: "all 0.2s ease",
       }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.background = "#161616")
-      }
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.background = "#0f0f0f")
-      }
     >
       {/* IMAGE */}
       <img
         src={machine.ui?.thumbnail}
         alt={machine.info.title}
         style={{
-          width: 42,
-          height: 42,
-          borderRadius: 8,
+          width: 40,
+          height: 40,
+          borderRadius: 10,
           objectFit: "cover",
-          background: "#1f1f1f",
+          background: theme.colors.surface,
+          boxShadow: hovered
+            ? "0 0 0 1px rgba(255,255,255,0.15)"
+            : "none",
+          transition: "box-shadow 0.2s ease",
         }}
       />
 
       {/* TEXT */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          lineHeight: 1.2,
+        }}
+      >
         <span
           style={{
-            fontSize: 14,
-            fontWeight: 500,
-            color: "white",
+            fontSize: "0.85rem",
+            fontWeight: 600,
+            color: theme.colors.textMain,
           }}
         >
           {machine.info.title}
         </span>
+
         <span
           style={{
-            fontSize: 12,
-            color: "#8a8a8a",
+            fontSize: "0.7rem",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: theme.colors.textMuted,
           }}
         >
           {machine.info.category}

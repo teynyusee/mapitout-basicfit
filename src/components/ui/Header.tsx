@@ -28,7 +28,7 @@ export function Header({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 16,
+          gap: 50,
           pointerEvents: "auto",
         }}
       >

@@ -1,11 +1,94 @@
+
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
+  background: #0a0a0a;
+  color: #ffffff;
+  font-family: "HeadingPro", system-ui, sans-serif;
 }
 
-body {
-  background: #0a0a0a;
-  color: #fff;
-  font-family: "HeadingPro", system-ui, sans-serif;
+
+.Slider-Effects {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  z-index: 20;
+  pointer-events: auto;
+
+  animation: sliderEffectsFadeIn 0.35s ease-out both;
+}
+
+
+@keyframes sliderEffectsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.Slider-Effects--hidden {
+  animation: sliderEffectsFadeOut 0.25s ease-in forwards;
+}
+
+@keyframes sliderEffectsFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+
+input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Slider-Effects {
+    animation: none;
+  }
+}
+
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 138, 0, 0.6);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 138, 0, 0.85);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,138,0,0.6) transparent;
 }
