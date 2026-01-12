@@ -20,7 +20,6 @@ export function MachineInfoPanel({ machine }: Props) {
         background: theme.colors.surface,
       }}
     >
-      {/* ================= HEADER ================= */}
       <div>
         <span
           style={{
@@ -48,7 +47,6 @@ export function MachineInfoPanel({ machine }: Props) {
           {info.title}
         </h2>
 
-        {/* ALGEMENE TAGS */}
         {info.tags?.length > 0 && (
           <div
             style={{
@@ -65,7 +63,6 @@ export function MachineInfoPanel({ machine }: Props) {
         )}
       </div>
 
-      {/* ================= DESCRIPTION ================= */}
       <p
         style={{
           margin: 0,
@@ -77,7 +74,6 @@ export function MachineInfoPanel({ machine }: Props) {
         {info.description}
       </p>
 
-      {/* ================= MUSCLE GROUPS ================= */}
       {info.muscleGroups?.length > 0 && (
         <div
           style={{

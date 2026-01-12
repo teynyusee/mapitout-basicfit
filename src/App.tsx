@@ -13,6 +13,8 @@ import type { ZoneId } from "./data/zones";
 import type { MachineConfig } from "./data/machines";
 import { CAMERA_NAMES } from "./data/cameras";
 
+
+
 type SelectedMachine = {
   machine: MachineConfig;
   root: THREE.Object3D;
@@ -45,9 +47,9 @@ export default function App() {
       dumbbells: 0,
     });
 
-  const sliderRAF = useRef<number | null>(null);
+    
 
-  /* ===================== ZONE CHANGE ===================== */
+  const sliderRAF = useRef<number | null>(null);
 
   const handleZoneChange = useCallback((zone: ZoneId) => {
     setActiveZone(zone);
@@ -59,7 +61,6 @@ export default function App() {
     }));
   }, []);
 
-  /* ===================== MACHINE SELECT ===================== */
 
   const handleMachineSelect = useCallback(
     (machine: MachineConfig, root: THREE.Object3D) => {
@@ -68,7 +69,6 @@ export default function App() {
     []
   );
 
-  /* ===================== SLIDER ===================== */
 
   const handleSliderChange = useCallback(
     (value: number) => {
@@ -86,7 +86,6 @@ export default function App() {
     [activeZone]
   );
 
-  /* ===================== CUSTOM EVENT (NO ANY) ===================== */
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -100,8 +99,6 @@ export default function App() {
       window.removeEventListener("zone-change", handler);
     };
   }, [handleZoneChange]);
-
-  /* ===================== RENDER ===================== */
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -133,8 +130,7 @@ export default function App() {
             }));
           }}
         />
-
-        {/* HOME CARDS */}
+        
         {activeZone === "home" && (
           <div
             style={{

@@ -1,73 +1,128 @@
-# React + TypeScript + Vite
+# Interactive Gym Experience
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React · TypeScript · Vite · React Three Fiber · Rapier
 
-Currently, two official plugins are available:
+## Projectbeschrijving
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Dit project is een interactieve 3D gym-ervaring gebouwd met React Three Fiber.  
+Gebruikers kunnen door verschillende zones navigeren, fitnessmachines selecteren, informatie bekijken en interactieve events activeren zoals vallende dumbbells met physics en audio.
 
-## React Compiler
+Het project focust op duidelijke architectuur, interactieve beleving en een strikte scheiding tussen 3D-rendering, logica en UI.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Interactieve 3D-scene met meerdere zones
+- Points of Interest in de vorm van fitnessmachines
+- Klik- en hover-interacties via raycasting
+- Zoekfunctie om machines snel terug te vinden
+- Geanimeerde camera’s en geforceerde camerastandpunten
+- Physics met Rapier (vallende dumbbells en collisions)
+- Audio feedback bij interacties
+- UI volledig losgekoppeld van de 3D-scene
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Architectuur
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 3D Scene
+De 3D-scene wordt opgebouwd in `components/scenes/SceneContents.tsx`.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Hier worden camera, zones, objecten, physics, interacties en visual effects samengebracht.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Interacties
+De interactielogica (raycasting, hover en klik) staat in `components/scenes/interactions/`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### UI / HTML
+De UI-componenten zoals modals, search en sliders staan in `components/ui/`.
+
+De UI reageert op applicatie-state en staat los van de 3D-logica om overzichtelijkheid en schaalbaarheid te behouden.
+
+### State & flow
+`App.tsx` beheert application-state zoals:
+- geselecteerde machine
+- actieve zone
+- UI-stat
+
+---
+
+## Zoekfunctie
+
+De zoekfunctie is geïmplementeerd via de hook `useSearchMachines`.
+
+Machines worden live gefilterd op basis van:
+- titel
+- categorie
+- tags
+- spiergroepen
+
+De resultaten worden beperkt tot maximaal acht entries om de performance en UX overzichtelijk te houden.
+
+---
+
+## Physics (Rapier)
+
+Voor interactieve elementen wordt Rapier gebruikt:
+
+- Dynamische rigid bodies voor dumbbells
+- Aangepaste gravity, friction en damping waarden
+- Collision detection met impact-afhankelijke audio
+
+Deze setup zorgt voor een realistische en fysieke beleving van vallende objecten.
+
+---
+
+## Camera & Animatie
+
+- Zone-gebaseerde camera-aansturing via custom hooks
+- Geforceerde camera’s gebruiken vooraf gedefinieerde cameras uit het 3D-model
+- Cinematische focus zonder verlies van gebruikerscontrole
+
+---
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Three.js
+- @react-three/fiber
+- @react-three/drei
+- @react-three/rapier
+- ESLint
+
+---
+
+## Blender Model Credits
+
+De 3D-fitnessapparatuur die in deze scène wordt gebruikt, is afkomstig van onderstaande asset:
+
+**Gym Equipment Pack** – gedownload van CGTrader  
+URL: https://www.cgtrader.com/3d-models/sports/equipment/35-gym-equipment-blender-fbx-obj-ready
+
+Deze modellen zijn gebruikt conform de licentievoorwaarden zoals verstrekt door de maker.
+
+---
+
+## Installatie en gebruik
+
+Terminal
+npm install
+npm run dev
+
+Open vervolgens je browser op de getoonde localhost-URL om de applicatie te bekijken.
+
+## Doel van het project
+
+Dit project is ontwikkeld als educatief en interactief 3D-project met focus op:
+
+- overzichtelijke en schaalbare code
+- scheiding tussen 3D-scene, logica en UI
+- performance en gebruikersbeleving
+
+## Auteur
+
+Teynur
+Arteveldehogeschool - Interactive Media Development
+Focus op UI/UX, frontend en interactieve 3D-ervaringen

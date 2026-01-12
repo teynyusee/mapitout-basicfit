@@ -19,7 +19,6 @@ export function ZoneViewSlider({ value, onChange }: Props) {
         border: `1px solid ${theme.colors.borderSubtle}`,
       }}
     >
-      {/* LABEL */}
       <div
         style={{
           fontSize: "0.7rem",
@@ -29,10 +28,9 @@ export function ZoneViewSlider({ value, onChange }: Props) {
           textTransform: "uppercase",
         }}
       >
-        Perspectief
+        Kamera Perspectief
       </div>
 
-      {/* SLIDER */}
       <input
         type="range"
         min={0}
@@ -57,7 +55,6 @@ export function ZoneViewSlider({ value, onChange }: Props) {
         }}
       />
 
-      {/* THUMB */}
       <style>
         {`
           input[type="range"]::-webkit-slider-thumb {

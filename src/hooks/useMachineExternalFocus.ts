@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 import type { RefObject } from "react";
 import type { MachineConfig } from "../data/machines";
@@ -22,12 +23,11 @@ export function useMachineExternalFocus(
       const isTarget = m.machine.id === focusedMachine.id;
 
       if (isTarget) {
-        // 🔥 ALTIJD resetten bij klik
         m.focusTimer = BLUE_ACTIVE_TIME;
         m.blueFade = 0;
       }
 
       m.focused = isTarget;
     });
-  }, [focusedMachine?.tick]); // 👈 BELANGRIJK
+  }, [focusedMachine?.tick]);
 }

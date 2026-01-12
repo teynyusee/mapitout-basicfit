@@ -3,14 +3,13 @@ import {
   OrbitControls,
   useGLTF,
 } from "@react-three/drei";
-import { useRef, useMemo } from "react";
+import { RigidBody } from "@react-three/rapier";
+import { useRef, useMemo, useState } from "react";
 import * as THREE from "three";
 
 import type { ZoneId } from "../../data/zones";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { MachineConfig } from "../../data/machines";
-
-import { ParallaxScene } from "./ParallaxScene";
 
 import { useZoneCamera } from "../../hooks/useZoneCamera";
 import { useMachinesSetup } from "../../hooks/useMachinesSetup";
@@ -19,13 +18,17 @@ import { useZoneHover } from "../../hooks/useZoneHover";
 import { useLogoAnimation } from "../../hooks/useLogoAnimation";
 import { useMachineExternalFocus } from "../../hooks/useMachineExternalFocus";
 import { useMachineHoverFocus } from "../../hooks/useMachineHoverFocus";
+import { useMachineInteractions } from "./interactions/machines/useMachineInteractions";
+
 
 import {
   createLogoClickHandler,
   createLogoHoverHandler,
   createLogoHoverOutHandler,
 } from "../intro/LogoScene";
-import { useMachineInteractions } from "./interactions/machines/useMachineInteractions";
+
+import { DroppedDumbbells } from "../../hooks/useDroppedDumbbells";
+import type { ThreeEvent } from "@react-three/fiber";
 
 type Props = {
   activeZone: ZoneId;
@@ -51,35 +54,41 @@ export function SceneContents({
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const gltf = useGLTF("/models/gym_overview.glb");
 
-  /* CAMERA */
-  useZoneCamera(activeZone, gltf, controlsRef, viewFactor);
+  const [forcedCamera, setForcedCamera] =
+    useState<THREE.Camera | null>(null);
 
-  /* MACHINES */
+
+  useZoneCamera(
+    activeZone,
+    gltf,
+    controlsRef,
+    viewFactor,
+    forcedCamera
+  );
+
   const machinesRef = useMachinesSetup(
     gltf.scene,
     activeZone
   );
 
-  useMachinesAnimation(machinesRef, visualEffectsEnabled);
-  useMachineExternalFocus(machinesRef, focusedMachine);
+  useMachinesAnimation(
+    machinesRef,
+    visualEffectsEnabled
+  );
 
-  /* 🔵 HOVER BLUE */
+  useMachineExternalFocus(
+    machinesRef,
+    focusedMachine
+  );
+
   const handleMachineHover =
     useMachineHoverFocus(machinesRef);
 
-  /* ZONES */
   const zoneHandlers = useZoneHover(
     gltf.scene,
     activeZone
   );
 
-  const machineInteractions = useMachineInteractions(
-    activeZone,
-    handleMachineSelect,
-    handleMachineHover
-  );
-
-  /* LOGO */
   useLogoAnimation(gltf.scene, activeZone);
 
   const logoHandlers = useMemo(
@@ -91,33 +100,42 @@ export function SceneContents({
     []
   );
 
-  function handleMachineSelect(
-    machine: MachineConfig,
-    root: THREE.Object3D
-  ) {
-    onMachineSelect(machine, root);
-  }
+  const machineInteractions =
+    useMachineInteractions(
+      activeZone,
+      onMachineSelect,
+      handleMachineHover
+    );
 
   return (
     <>
-      <ParallaxScene
-        scene={gltf.scene}
-        onPointerMove={(e) => {
+      <primitive
+        object={gltf.scene}
+        onPointerMove={(e: ThreeEvent<PointerEvent>) => {
           if (logoHandlers.onHover(e)) return;
-
           machineInteractions.onPointerMove();
           zoneHandlers.onPointerMove(e);
         }}
-        onPointerOut={(e) => {
+        onPointerOut={(e: ThreeEvent<PointerEvent> | undefined) => {
           logoHandlers.onHoverOut(e);
           zoneHandlers.onPointerOut(e);
         }}
-        onClick={(e) => {
+        onClick={(e: ThreeEvent<MouseEvent>) => {
           if (logoHandlers.onClick(e)) return;
-
           machineInteractions.onClick();
           zoneHandlers.onClick(e);
         }}
+      />
+
+      {gltf.nodes["reck_plane"] && (
+        <RigidBody type="fixed" colliders="cuboid">
+          <primitive object={gltf.nodes["reck_plane"]} />
+        </RigidBody>
+      )}
+
+      <DroppedDumbbells
+        gltf={gltf}
+        setForcedCamera={setForcedCamera}
       />
 
       <ContactShadows

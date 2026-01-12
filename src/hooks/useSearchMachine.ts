@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MachineConfig } from "../data/machines";
 
-/* ---------------- HOOK ---------------- */
 export function useSearchMachines(machines: MachineConfig[]) {
   const [query, setQuery] = useState("");
 

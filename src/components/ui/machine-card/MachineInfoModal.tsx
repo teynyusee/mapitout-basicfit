@@ -93,7 +93,6 @@ export function MachineInfoModal({
   );
 }
 
-/* ================= CLOSE BUTTON ================= */
 
 function CloseButton({ onClick }: { onClick: () => void }) {
   return (

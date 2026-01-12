@@ -6,26 +6,47 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { CAMERA_NAMES } from "../data/cameras";
 import type { ZoneId } from "../data/zones";
 
+/* =======================
+   TYPES
+======================= */
+
 type GLTFWithCameras = {
   cameras: THREE.Camera[];
 };
+
+/* =======================
+   HOOK
+======================= */
 
 export function useZoneCamera(
   activeZone: ZoneId,
   gltf: GLTFWithCameras,
   controlsRef: React.MutableRefObject<OrbitControlsImpl | null>,
-  viewFactor: number
+  viewFactor: number,
+  forcedCamera: THREE.Camera | null
 ) {
   const { camera } = useThree();
 
-  /* ===============================
-     STATE
-  =============================== */
   const isFirstLoad = useRef(true);
 
-  /* ===============================
-     VECTORS (NO GC)
-  =============================== */
+  /* =======================
+     🔊 CAMERA WHOOSH SOUND
+  ======================= */
+
+  const whooshAudioRef =
+    useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    whooshAudioRef.current = new Audio(
+      "/sounds/camera_whoosh.mp3"
+    );
+    whooshAudioRef.current.volume = 0.45;
+  }, []);
+
+  /* =======================
+     CAMERA POSITIONS
+  ======================= */
+
   const posA = useRef(new THREE.Vector3());
   const posB = useRef(new THREE.Vector3());
   const targetA = useRef(new THREE.Vector3());
@@ -39,104 +60,111 @@ export function useZoneCamera(
   const blendedPos = useRef(new THREE.Vector3());
   const blendedTarget = useRef(new THREE.Vector3());
 
-  /* ===============================
-     TRANSITION
-  =============================== */
   const transitionT = useRef(1);
+
   const SWITCH_DURATION = 1.2;
   const SLIDER_SMOOTHNESS = 8;
 
-  /* ===============================
-     EASING
-  =============================== */
   function easeInOutCubic(t: number) {
     return t < 0.5
       ? 4 * t * t * t
       : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  /* ===============================
-     ZONE CHANGE
-  =============================== */
+
   useEffect(() => {
     const def = CAMERA_NAMES[activeZone];
 
-    const camAName = def.views ? def.views[0] : def.main;
-    const camBName = def.views ? def.views[1] : def.main;
+    const camA = forcedCamera
+      ? forcedCamera
+      : gltf.cameras.find(
+          (c) =>
+            c.name ===
+            (def.views ? def.views[0] : def.main)
+        );
 
-    const camA = gltf.cameras.find(c => c.name === camAName);
-    const camB = gltf.cameras.find(c => c.name === camBName);
+    const camB = forcedCamera
+      ? forcedCamera
+      : gltf.cameras.find(
+          (c) =>
+            c.name ===
+            (def.views ? def.views[1] : def.main)
+        );
 
     if (!camA || !camB) return;
 
     camA.updateMatrixWorld(true);
     camB.updateMatrixWorld(true);
 
-    // POSITIONS
     camA.getWorldPosition(posA.current);
     camB.getWorldPosition(posB.current);
 
-    // TARGETS
     const dirA = new THREE.Vector3();
     const dirB = new THREE.Vector3();
+
     camA.getWorldDirection(dirA);
     camB.getWorldDirection(dirB);
 
     targetA.current.copy(posA.current).add(dirA);
     targetB.current.copy(posB.current).add(dirB);
 
-    // FOV
     if (camA instanceof THREE.PerspectiveCamera) {
-      const realCam = camera as THREE.PerspectiveCamera;
+      const realCam =
+        camera as THREE.PerspectiveCamera;
       realCam.fov = camA.fov;
       realCam.near = camA.near;
       realCam.far = camA.far;
       realCam.updateProjectionMatrix();
     }
 
-    /* ---------- FIRST LOAD ---------- */
     if (isFirstLoad.current) {
       camera.position.copy(posA.current);
-
-      if (controlsRef.current) {
-        controlsRef.current.target.copy(targetA.current);
-        controlsRef.current.update();
-      } else {
-        camera.lookAt(targetA.current);
-      }
-
+      controlsRef.current?.target.copy(
+        targetA.current
+      );
+      controlsRef.current?.update();
       transitionT.current = 1;
       isFirstLoad.current = false;
       return;
     }
 
-    /* ---------- ZONE SWITCH ---------- */
+
+    whooshAudioRef.current?.pause();
+    whooshAudioRef.current!.currentTime = 0;
+    whooshAudioRef.current
+      ?.play()
+      .catch(() => {});
+
     fromPos.current.copy(camera.position);
     toPos.current.copy(posA.current);
 
-    if (controlsRef.current) {
-      fromTarget.current.copy(controlsRef.current.target);
-    } else {
-      fromTarget.current.copy(targetA.current);
-    }
-
+    fromTarget.current.copy(
+      controlsRef.current?.target ??
+        targetA.current
+    );
     toTarget.current.copy(targetA.current);
+
     transitionT.current = 0;
+  }, [
+    activeZone,
+    forcedCamera,
+    gltf,
+    camera,
+    controlsRef,
+  ]);
 
-  }, [activeZone, gltf, camera, controlsRef]);
 
-  /* ===============================
-     FRAME LOOP
-  =============================== */
   useFrame((_, delta) => {
-    /* -------- ZONE TRANSITION -------- */
     if (transitionT.current < 1) {
       transitionT.current = Math.min(
-        transitionT.current + delta / SWITCH_DURATION,
+        transitionT.current +
+          delta / SWITCH_DURATION,
         1
       );
 
-      const t = easeInOutCubic(transitionT.current);
+      const t = easeInOutCubic(
+        transitionT.current
+      );
 
       blendedPos.current.lerpVectors(
         fromPos.current,
@@ -151,23 +179,21 @@ export function useZoneCamera(
       );
 
       camera.position.copy(blendedPos.current);
-
-      if (controlsRef.current) {
-        controlsRef.current.target.copy(blendedTarget.current);
-        controlsRef.current.update();
-      } else {
-        camera.lookAt(blendedTarget.current);
-      }
-
+      controlsRef.current?.target.copy(
+        blendedTarget.current
+      );
+      controlsRef.current?.update();
       return;
     }
 
-    /* -------- SLIDER A ↔ B -------- */
+    if (forcedCamera) return;
+
     const def = CAMERA_NAMES[activeZone];
     if (!def.views) return;
 
     const easedView = easeInOutCubic(viewFactor);
-    const smooth = 1 - Math.exp(-delta * SLIDER_SMOOTHNESS);
+    const smooth =
+      1 - Math.exp(-delta * SLIDER_SMOOTHNESS);
 
     const desiredPos = blendedPos.current
       .copy(posA.current)
@@ -178,12 +204,10 @@ export function useZoneCamera(
       .lerp(targetB.current, easedView);
 
     camera.position.lerp(desiredPos, smooth);
-
-    if (controlsRef.current) {
-      controlsRef.current.target.lerp(desiredTarget, smooth);
-      controlsRef.current.update();
-    } else {
-      camera.lookAt(desiredTarget);
-    }
+    controlsRef.current?.target.lerp(
+      desiredTarget,
+      smooth
+    );
+    controlsRef.current?.update();
   });
 }

@@ -73,7 +73,6 @@ export function useMachinesSetup(
         machinesRef.current.push(entry);
       }
 
-      // zone visibility
       entry.active = machine.zone === activeZone;
     });
   }, [scene, activeZone]);

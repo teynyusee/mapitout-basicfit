@@ -30,7 +30,7 @@ export const CAMERA_NAMES: Record<
   },
 
   dumbbells: {
-    main: "Camera_Dumbbells_B",
-    views: ["Camera_Dumbbells_B", "Camera_Dumbbells_A", ],
+    main: "Camera_Dumbbells_A",
+    views: ["Camera_Dumbbells_A", "Camera_Dumbbells_B", "Camera_Dumbbells_C" ],
   },
 };

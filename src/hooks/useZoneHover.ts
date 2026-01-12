@@ -11,11 +11,17 @@ export function useZoneHover(
   activeZone: ZoneId
 ) {
   const [hoveredZone, setHoveredZone] = useState<ZoneId | null>(null);
+
   const initialized = useRef<Set<THREE.Mesh>>(new Set());
 
-  /**
-   * 1️⃣ Clone material per plane (1x)
-   */
+  const hoverAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastHoveredZone = useRef<ZoneId | null>(null);
+
+  useEffect(() => {
+    hoverAudioRef.current = new Audio("/sounds/hover_sound.mp3");
+    hoverAudioRef.current.volume = 0.4;
+  }, []);
+
   useEffect(() => {
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -25,16 +31,12 @@ export function useZoneHover(
         obj.material = (obj.material as THREE.Material).clone();
         initialized.current.add(obj);
 
-        // init fade data
         obj.userData.currentOpacity = 0;
         obj.userData.opacityTarget = 0;
       }
     });
   }, [scene]);
 
-  /**
-   * 2️⃣ Set opacity TARGETS (geen animatie hier)
-   */
   useEffect(() => {
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -47,9 +49,6 @@ export function useZoneHover(
     });
   }, [scene, hoveredZone]);
 
-  /**
-   * 3️⃣ Smooth fade animation
-   */
   useEffect(() => {
     let frameId: number;
 
@@ -60,18 +59,15 @@ export function useZoneHover(
 
         const material = obj.material as THREE.MeshStandardMaterial;
         material.transparent = true;
-
-        // kleur blijft altijd theme-based
         material.color.copy(zoneHoverColor);
 
         obj.userData.currentOpacity = THREE.MathUtils.lerp(
           obj.userData.currentOpacity ?? 0,
           obj.userData.opacityTarget ?? 0,
-          0.12 // 👈 fade snelheid (lager = trager)
+          0.12
         );
 
         material.opacity = obj.userData.currentOpacity;
-
         material.colorWrite = material.opacity > 0.01;
       });
 
@@ -82,9 +78,6 @@ export function useZoneHover(
     return () => cancelAnimationFrame(frameId);
   }, [scene]);
 
-  /**
-   * 4️⃣ Hover detectie
-   */
   const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
     if (activeZone !== "overview") return;
 
@@ -96,23 +89,30 @@ export function useZoneHover(
 
     if (!hit) {
       setHoveredZone(null);
+      lastHoveredZone.current = null;
       document.body.style.cursor = "default";
       return;
     }
 
     const zone = hit.object.name.replace("_plane", "") as ZoneId;
+
+    if (lastHoveredZone.current !== zone) {
+      hoverAudioRef.current?.pause();
+      hoverAudioRef.current!.currentTime = 0;
+      hoverAudioRef.current?.play().catch(() => {});
+      lastHoveredZone.current = zone;
+    }
+
     setHoveredZone(zone);
     document.body.style.cursor = "pointer";
   };
 
   const onPointerOut = () => {
     setHoveredZone(null);
+    lastHoveredZone.current = null;
     document.body.style.cursor = "default";
   };
 
-  /**
-   * 5️⃣ CLICK → zone-change + fade out
-   */
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     if (activeZone !== "overview") return;
 
@@ -124,8 +124,8 @@ export function useZoneHover(
 
     if (!hit) return;
 
-    // 👇 trigger fade out
     setHoveredZone(null);
+    lastHoveredZone.current = null;
 
     const zone = hit.object.name.replace("_plane", "") as ZoneId;
 
@@ -137,16 +137,16 @@ export function useZoneHover(
   };
 
   return {
-  onPointerMove: onPointerMove as (
-    e: ThreeEvent<PointerEvent>
-  ) => void,
+    onPointerMove: onPointerMove as (
+      e: ThreeEvent<PointerEvent>
+    ) => void,
 
-  onPointerOut: onPointerOut as (
-    e?: ThreeEvent<PointerEvent>
-  ) => void,
+    onPointerOut: onPointerOut as (
+      e?: ThreeEvent<PointerEvent>
+    ) => void,
 
-  onClick: onClick as (
-    e: ThreeEvent<MouseEvent>
-  ) => void,
+    onClick: onClick as (
+      e: ThreeEvent<MouseEvent>
+    ) => void,
   };
 }

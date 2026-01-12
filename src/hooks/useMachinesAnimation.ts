@@ -18,7 +18,6 @@ export function useMachinesAnimation(
     const t = clock.getElapsedTime();
 
     machinesRef.current.forEach((entry, i) => {
-      /* ================= ACTIVATION ================= */
       const activationTarget = entry.active ? 1 : 0;
       entry.activation = THREE.MathUtils.lerp(
         entry.activation,
@@ -26,7 +25,6 @@ export function useMachinesAnimation(
         delta * SCENE_CONFIG.activationSpeed
       );
 
-      /* ================= FOCUS ================= */
       const focusTarget = entry.focused ? 1 : 0;
       entry.focusIntensity = THREE.MathUtils.lerp(
         entry.focusIntensity,
@@ -34,7 +32,6 @@ export function useMachinesAnimation(
         delta * 1.8
       );
 
-      /* ================= BLUE FADE (SEARCH / FOCUS) ================= */
       entry.focusTimer = Math.max(
         0,
         entry.focusTimer - delta
@@ -47,14 +44,11 @@ export function useMachinesAnimation(
         delta * BLUE_FADE_SPEED
       );
 
-      const a = entry.activation;      // zone actief
-      const f = entry.focusIntensity;  // hover / focus
-      const b = entry.blueFade;        // search highlight
-
-      /* ================= MOTION FACTOR ================= */
+      const a = entry.activation;      
+      const f = entry.focusIntensity; 
+      const b = entry.blueFade;        
       const motionFactor = visualEffectsEnabled ? 1 : 0;
 
-      /* ================= FLOATING ================= */
       entry.obj.position.y =
         entry.baseY +
         Math.sin(
@@ -65,14 +59,12 @@ export function useMachinesAnimation(
           motionFactor *
           (1 + f * 0.6);
 
-      /* ================= ROTATION ================= */
       entry.obj.rotation.y =
         Math.sin(t * 0.6 + i) *
         SCENE_CONFIG.rotationAmount *
         a *
         motionFactor;
 
-      /* ================= GLOW ================= */
       const pulse = 0.6 + Math.sin(t * 4) * 0.4;
 
       const ambientGlow = visualEffectsEnabled
@@ -88,12 +80,10 @@ export function useMachinesAnimation(
         const mat =
           mesh.material as THREE.MeshStandardMaterial;
 
-        /* kleur mengen */
         mat.emissive
           .copy(glowColor)
           .lerp(searchGlowColor, b);
 
-        /* intensity bepalen */
         mat.emissiveIntensity =
           ambientGlow + focusGlow;
       });

@@ -18,16 +18,16 @@ export const DUMBBELL_MACHINES: MachineConfig[] = [
     },
   },
   {
-    id: "dumbbell-rack",
-    meshName: "SM__DumbbellReck",
+    id: "dumbbell-reck",
+    meshName: "SM__DB__Deco",
     zone: "dumbbells",
     info: {
-      title: "Dumbbell Rack",
+      title: "Dumbbell Rek",
       description:
-        "Rek met dumbbells in verschillende gewichten.",
+        "Rek voor gewichten.",
       category: "Dumbbells",
-      tags: ["Free Weights"],
-      muscleGroups: ["Full Body"],
+      tags: ["Bench", "Free Weights"],
+      muscleGroups: ["Borst", "Schouders", "Armen"],
     },
     ui: {
       thumbnail: "/images/machines/dumbbell-rack.png",
