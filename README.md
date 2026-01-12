@@ -1,4 +1,4 @@
-# Interactive Gym Experience
+# Map It Out - Basic-Fit
 
 React · TypeScript · Vite · React Three Fiber · Rapier
 

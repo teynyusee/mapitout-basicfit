@@ -243,7 +243,9 @@ export function DroppedDumbbells({
         dumbbells.map((d, i) => (
           <RigidBody
             key={i}
-            ref={(api) => (bodiesRef.current[i] = api)}
+            ref={(api) => {
+              bodiesRef.current[i] = api;
+            }}
             type="dynamic"
             mass={18}
             gravityScale={1.8}      
